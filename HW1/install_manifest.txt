@@ -1,4 +1,0 @@
-/usr/local/lib/libwidgets_library.so.1.0
-/usr/local/lib/libwidgets_library.so.1
-/usr/local/lib/libwidgets_library.so
-/usr/local/include/widgets_library/hw1.hpp
