@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/testy.dir/tests.cpp.o -o testy  -Wl,-rpath,/home/user/pb173/HW1 libwidlib.so 

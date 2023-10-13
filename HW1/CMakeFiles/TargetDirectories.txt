@@ -1,0 +1,4 @@
+/home/user/pb173/HW1/CMakeFiles/widlib.dir
+/home/user/pb173/HW1/CMakeFiles/testy.dir
+/home/user/pb173/HW1/CMakeFiles/edit_cache.dir
+/home/user/pb173/HW1/CMakeFiles/rebuild_cache.dir
