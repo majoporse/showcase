@@ -1,25 +1,25 @@
 #include "hw1.hpp"
 
+void WObject::change_parent(WObject *new_parent)
+{
+     parent = new_parent;
+}
+
 void WLabel::set_label(std::string new_message) { message = std::move(new_message); }
-WObject *WLabel::find_child(std::string &&s_name) { return s_name == name ? this : nullptr; }
+WObject *WLabel::find_child(const std::string &s_name) { return s_name == name ? this : nullptr; }
 std::ostream &WLabel::print(std::ostream &o, std::string prefix) const
 {
      return o << prefix << "[Label:" << name << "] Displaying: "
-               << "\"" << message << "\", parent: " << (parent ? parent->get_name() : "None") << "\n";
+              << "\"" << message << "\", parent: " << (parent ? parent->get_name() : "None") << "\n";
 }
 
-
-
-WObject *WButton::find_child(std::string &&s_name)  { return s_name == name ? this : nullptr; }
-std::ostream &WButton::print(std::ostream &o, std::string prefix) const 
+WObject *WButton::find_child(const std::string &s_name) { return s_name == name ? this : nullptr; }
+std::ostream &WButton::print(std::ostream &o, std::string prefix) const
 {
      return o << prefix << "[Button:" << name << "] |" << message << "| parent: " << (parent ? parent->get_name() : "None") << "\n";
 }
 
-
-
-
-WObject *WGridLayout::find_child(std::string &&s_name)
+WObject *WGridLayout::find_child(const std::string &s_name)
 {
      for (auto [a, ptr] : elems)
      {
@@ -41,13 +41,14 @@ void WGridLayout::add_elem(double x, double y, WObject *new_object)
      if (std::ranges::find_if(elems, pred) != elems.end())
           return;
 
+     new_object->change_parent(this);
      elems.emplace(std::tuple{x, y}, new_object);
 }
 
-std::ostream &WGridLayout::print(std::ostream &o, std::string prefix) const 
+std::ostream &WGridLayout::print(std::ostream &o, std::string prefix) const
 {
      o << prefix << "[GridLayout:" << name << "] parent: " << (parent ? parent->get_name() : "None") << "\n";
-     for (auto [it, i] = std::tuple{elems.begin(), 0}; i < elems.size() - 1; ++i, ++it)
+     for (auto [it, i] = std::tuple{elems.begin(), 0}; i + 1 < elems.size(); ++i, ++it)
      {
           o << prefix << "|-- [Row:" << std::get<0>(it->first) << "]";
           o << "[Col:" << std::get<1>(it->first) << "]\n";
@@ -69,8 +70,7 @@ WGridLayout::~WGridLayout()
           delete b;
 }
 
-
-WObject *WTabLayout::find_child(std::string &&s_name)
+WObject *WTabLayout::find_child(const std::string &s_name)
 {
      for (auto a : tabs)
      {
@@ -85,7 +85,7 @@ WObject *WTabLayout::find_child(std::string &&s_name)
 std::ostream &WTabLayout::print(std::ostream &o, std::string prefix) const
 {
      o << prefix << "[Tabs:" << name << "] parent: " << (parent ? parent->get_name() : "None") << " tabs: " << tabs.size() << "\n";
-     for (auto [it, i] = std::tuple{tabs.begin(), 0}; i < tabs.size() - 1; ++i, ++it)
+     for (auto [it, i] = std::tuple{tabs.begin(), 0}; i + 1 < tabs.size(); ++i, ++it)
      {
           o << prefix << "|-- [Tab:" << i << "]\n";
           (*it)->print(o, prefix + "|   ");
@@ -103,14 +103,15 @@ std::ostream &WTabLayout::print(std::ostream &o, std::string prefix) const
 void WTabLayout::add_tab(WObject *new_object)
 {
      if (std::ranges::find(tabs, new_object->get_name(),
-                         [](WObject *a)
-                         { return a->get_name(); }) != tabs.end())
+                           [](WObject *a)
+                           { return a->get_name(); }) != tabs.end())
           return;
      tabs.push_back(new_object);
-     new_object->parent = this;
+     new_object->change_parent(this);
 }
 
-WTabLayout::~WTabLayout(){
+WTabLayout::~WTabLayout()
+{
      for (auto a : tabs)
           delete a;
 }
@@ -119,18 +120,18 @@ void WWidget::set_child(WObject *new_child)
 {
      delete child;
      child = new_child;
-     child->parent = this;
+     child->change_parent(this);
 }
 
-WObject *WWidget::find_child(std::string &&s_name) { return s_name == name ? this : child ? child->find_child(std::move(s_name)) : nullptr; }
+WObject *WWidget::find_child(const std::string &s_name) { return s_name == name ? this : child ? child->find_child(std::move(s_name))
+                                                                                          : nullptr; }
 
 std::ostream &WWidget::print(std::ostream &o, std::string prefix) const
 {
      o << prefix << "[Widget:" << name << "] "
-     << " parent: " << (parent ? parent->get_name() : "None") << "|" << (child ? child->get_name() : "None") << "\n";
+        << "parent: " << (parent ? parent->get_name() : "None") << "|" << (child ? child->get_name() : "None") << "\n";
 
      return child ? (child->print(o, prefix + "   ")) : o;
 }
 
 WWidget::~WWidget() { delete child; }
-
