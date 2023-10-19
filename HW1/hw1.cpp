@@ -31,7 +31,7 @@ WObject *WGridLayout::find_child(const std::string &s_name)
      return nullptr;
 }
 
-void WGridLayout::add_elem(double x, double y, WObject *new_object)
+void WGridLayout::add_elem(int x, int y, WObject *new_object)
 {
      auto pred = [&](auto a)
      {

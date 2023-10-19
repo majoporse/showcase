@@ -151,7 +151,7 @@ class WGridLayout : public WObject
 {
     int rows;                                              /**< Number of rows in the grid layout. */
     int cols;                                              /**< Number of columns in the grid layout. */
-    std::map<std::tuple<double, double>, WObject *> elems; /**< Map of grid elements. */
+    std::map<std::tuple<int, int>, WObject *> elems; /**< Map of grid elements. */
 public:
     /**
      * @brief Constructor for WGridLayout.
@@ -175,7 +175,7 @@ public:
      * @param y The Y coordinate of the grid cell.
      * @param new_object The widget to add to the grid cell.
      */
-    void add_elem(double x, double y, WObject *new_object);
+    void add_elem(int x, int y, WObject *new_object);
 
     /**
      * @brief Print the grid layout's information.
