@@ -107,4 +107,5 @@ CMakeLists.txt.user*
 *CVIKA*
 .vscode
 googletest
+*local*
 # End of https://www.toptal.com/developers/gitignore/api/qt,qtcreator,cmake
