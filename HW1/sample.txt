@@ -1,0 +1,147 @@
+All tests passed!
+===== Print base output =====
+[GridLayout:grid1] parent: None
+|-- [Row:0][Col:0]
+|  [Label:label1] Displaying: "Ahoj svete", parent: None
+|-- [Row:0][Col:1]
+|  [Widget:widget1]  parent: None|widget1Layout
+|     [GridLayout:widget1Layout] parent: widget1
+|     |-- [Row:0][Col:0]
+|     |  [Label:widget1ul] Displaying: "Left", parent: None
+|     |-- [Row:0][Col:1]
+|     |  [Label:widget1ur] Displaying: "Right", parent: None
+|     |-- [Row:1][Col:0]
+|     |  [Button:widget1dl] |ok| parent: None
+|     \-- [Row:1][Col:1]
+|         [Button:widget1dr] |decline| parent: None
+|-- [Row:1][Col:0]
+|  [GridLayout:grid2] parent: None
+|  \-- [Row:0][Col:0]
+|      [Button:button2] |Don't click| parent: None
+|-- [Row:1][Col:1]
+|  [Button:button1] |Click Me!| parent: None
+|-- [Row:2][Col:0]
+|  [Tabs:tab1] parent: None tabs: 2
+|  |-- [Tab:0]
+|  |   [Widget:widget_tab1]  parent: None|widget_tab1Layout
+|  |      [GridLayout:widget_tab1Layout] parent: widget_tab1
+|  |      |-- [Row:0][Col:0]
+|  |      |  [Label:widget_tab1ul] Displaying: "Left", parent: None
+|  |      |-- [Row:0][Col:1]
+|  |      |  [Label:widget_tab1ur] Displaying: "Right", parent: None
+|  |      |-- [Row:1][Col:0]
+|  |      |  [Button:widget_tab1dl] |ok| parent: None
+|  |      \-- [Row:1][Col:1]
+|  |          [Button:widget_tab1dr] |decline| parent: None
+|  \-- [Tab:1]
+|      [Widget:widget_tab2]  parent: None|widget_tab2Layout
+|         [GridLayout:widget_tab2Layout] parent: widget_tab2
+|         |-- [Row:0][Col:0]
+|         |  [Label:widget_tab2ul] Displaying: "Left", parent: None
+|         |-- [Row:0][Col:1]
+|         |  [Label:widget_tab2ur] Displaying: "Right", parent: None
+|         |-- [Row:1][Col:0]
+|         |  [Button:widget_tab2dl] |ok| parent: None
+|         \-- [Row:1][Col:1]
+|             [Button:widget_tab2dr] |decline| parent: None
+\-- [Row:2][Col:1]
+    [Widget:widget2]  parent: None|widget2Layout
+       [GridLayout:widget2Layout] parent: widget2
+       |-- [Row:0][Col:0]
+       |  [Label:widget2ul] Displaying: "Left", parent: None
+       |-- [Row:0][Col:1]
+       |  [Label:widget2ur] Displaying: "Right", parent: None
+       |-- [Row:1][Col:0]
+       |  [Button:widget2dl] |ok| parent: None
+       \-- [Row:1][Col:1]
+           [Button:widget2dr] |decline| parent: None
+
+
+===== Print subelement =====
+[Widget:widget_tab1]  parent: None|widget_tab1Layout
+   [GridLayout:widget_tab1Layout] parent: widget_tab1
+   |-- [Row:0][Col:0]
+   |  [Label:widget_tab1ul] Displaying: "Left", parent: None
+   |-- [Row:0][Col:1]
+   |  [Label:widget_tab1ur] Displaying: "Right", parent: None
+   |-- [Row:1][Col:0]
+   |  [Button:widget_tab1dl] |ok| parent: None
+   \-- [Row:1][Col:1]
+       [Button:widget_tab1dr] |decline| parent: None
+
+
+0x5606e2c6e250
+===== Show local update =====
+[Label:widget_tab1ul] Displaying: "Empty", parent: None
+
+
+===== Show update on parent =====
+[Widget:widget_tab1]  parent: None|widget_tab1Layout
+   [GridLayout:widget_tab1Layout] parent: widget_tab1
+   |-- [Row:0][Col:0]
+   |  [Label:widget_tab1ul] Displaying: "Empty", parent: None
+   |-- [Row:0][Col:1]
+   |  [Label:widget_tab1ur] Displaying: "Right", parent: None
+   |-- [Row:1][Col:0]
+   |  [Button:widget_tab1dl] |ok| parent: None
+   \-- [Row:1][Col:1]
+       [Button:widget_tab1dr] |decline| parent: None
+
+
+===== Show update globally ======
+[GridLayout:grid1] parent: None
+|-- [Row:0][Col:0]
+|  [Label:label1] Displaying: "Ahoj svete", parent: None
+|-- [Row:0][Col:1]
+|  [Widget:widget1]  parent: None|widget1Layout
+|     [GridLayout:widget1Layout] parent: widget1
+|     |-- [Row:0][Col:0]
+|     |  [Label:widget1ul] Displaying: "Left", parent: None
+|     |-- [Row:0][Col:1]
+|     |  [Label:widget1ur] Displaying: "Right", parent: None
+|     |-- [Row:1][Col:0]
+|     |  [Button:widget1dl] |ok| parent: None
+|     \-- [Row:1][Col:1]
+|         [Button:widget1dr] |decline| parent: None
+|-- [Row:1][Col:0]
+|  [GridLayout:grid2] parent: None
+|  \-- [Row:0][Col:0]
+|      [Button:button2] |Don't click| parent: None
+|-- [Row:1][Col:1]
+|  [Button:button1] |Click Me!| parent: None
+|-- [Row:2][Col:0]
+|  [Tabs:tab1] parent: None tabs: 2
+|  |-- [Tab:0]
+|  |   [Widget:widget_tab1]  parent: None|widget_tab1Layout
+|  |      [GridLayout:widget_tab1Layout] parent: widget_tab1
+|  |      |-- [Row:0][Col:0]
+|  |      |  [Label:widget_tab1ul] Displaying: "Empty", parent: None
+|  |      |-- [Row:0][Col:1]
+|  |      |  [Label:widget_tab1ur] Displaying: "Right", parent: None
+|  |      |-- [Row:1][Col:0]
+|  |      |  [Button:widget_tab1dl] |ok| parent: None
+|  |      \-- [Row:1][Col:1]
+|  |          [Button:widget_tab1dr] |decline| parent: None
+|  \-- [Tab:1]
+|      [Widget:widget_tab2]  parent: None|widget_tab2Layout
+|         [GridLayout:widget_tab2Layout] parent: widget_tab2
+|         |-- [Row:0][Col:0]
+|         |  [Label:widget_tab2ul] Displaying: "Left", parent: None
+|         |-- [Row:0][Col:1]
+|         |  [Label:widget_tab2ur] Displaying: "Right", parent: None
+|         |-- [Row:1][Col:0]
+|         |  [Button:widget_tab2dl] |ok| parent: None
+|         \-- [Row:1][Col:1]
+|             [Button:widget_tab2dr] |decline| parent: None
+\-- [Row:2][Col:1]
+    [Widget:widget2]  parent: None|widget2Layout
+       [GridLayout:widget2Layout] parent: widget2
+       |-- [Row:0][Col:0]
+       |  [Label:widget2ul] Displaying: "Left", parent: None
+       |-- [Row:0][Col:1]
+       |  [Label:widget2ur] Displaying: "Right", parent: None
+       |-- [Row:1][Col:0]
+       |  [Button:widget2dl] |ok| parent: None
+       \-- [Row:1][Col:1]
+           [Button:widget2dr] |decline| parent: None
+Ending simulation
