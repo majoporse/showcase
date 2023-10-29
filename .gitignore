@@ -110,6 +110,5 @@ googletest
 *local*
 # End of https://www.toptal.com/developers/gitignore/api/qt,qtcreator,cmake
 *autogen*
-CVIKA HW1 HW2 README.md build-HW2-Desktop-Debug googletest
-HW2
+build-HW2-Desktop-Debug googletest
 *.idea*
