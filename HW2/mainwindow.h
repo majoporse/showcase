@@ -38,10 +38,6 @@ private:
     void showResult();
     void addMem();
 
-    rational parsePrio1(std::stringstream &ss);
-    rational parsePrio2(std::stringstream &ss);
-    rational parsePrio3(std::stringstream &ss);
-    rational parsePar(std::stringstream &ss);
 
 signals:
     void pressed(const char*);

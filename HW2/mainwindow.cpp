@@ -8,6 +8,8 @@
 #include <QClipboard>
 #include <QErrorMessage>
 #include <QTextBrowser>
+#include "parser.h"
+
 const char *hintText = R"(
 _____________________________
 
@@ -160,7 +162,7 @@ void MainWindow::updateLabel(const char* s){
 void MainWindow::showResult(){
     QString toShow;
     if (!ui->radioButton->isChecked())
-        toShow = QString::number(result.value());
+        toShow = QString::number(result.value()).setNum(result.value(),'g', ui->horizontalSlider->sliderPosition());//QString::number(result.value());
     else
         toShow = QString::number(result.nom) + QString{"/"} + QString::number(result.denom);
     ui->lineEdit->setText(toShow);
@@ -171,7 +173,7 @@ void MainWindow::compute_result(){
     std::stringstream s{ui->lineEdit->text().toStdString()};
     int size = ui->lineEdit->text().size();
     try{
-        result = parsePrio1(s);
+        result = parsePrio1(s, memory, false);
         showResult();
     } catch (int pos){
 
@@ -190,110 +192,6 @@ void MainWindow::compute_result(){
 
 }
 
-bool is_numeric(char c){
-    return c >= '0' && c <= '9';
-}
-
-std::string_view NUMBERS{"0123456789"};
-std::string_view OPERATORS_PRIO1{"+-"};
-std::string_view OPERATORS_PRIO2{"*/"};
-std::string_view OPERATORS_PRIO3{"^"};
-
-
-rational MainWindow::parsePar(std::stringstream &ss){
-    char par;
-    ss >> par;
-    rational cur = parsePrio1(ss);
-    if (ss.peek() != ')')
-        throw (int) ss.tellg();
-    ss >> par;
-    return cur;
-}
-
-
-rational MainWindow::parsePrio1(std::stringstream &ss){
-    rational r = parsePrio2(ss);
-    while(OPERATORS_PRIO1.find_first_of(ss.peek()) != std::string::npos){
-        char op;
-        switch (ss.peek()) {
-        case('+'):
-            ss >> op;
-            r += parsePrio2(ss);
-            break;
-        case('-'):
-            ss >> op;
-            r -= parsePrio2(ss);
-            break;
-        default:
-            break;
-        }
-    }
-    if (!ss.eof() && ss.peek() != ')')
-        throw (int) ss.tellg();
-    return r;
-}
-
-rational MainWindow::parsePrio2(std::stringstream &ss){
-    rational res = parsePrio3(ss);
-    while (OPERATORS_PRIO2.find_first_of(ss.peek()) != std::string::npos){
-        char op;
-        switch (ss.peek()) {
-            case('*'):
-                ss >> op;
-                res *= parsePrio3(ss);
-                break;
-            case('/'):
-                ss >> op;
-                res /= parsePrio3(ss);
-                break;
-            default:
-                break;
-        }
-    }
-    return res;
-}
-
-rational MainWindow::parsePrio3(std::stringstream &ss){
-    int nom;
-    rational r(0,0);
-    if (ss.peek() == '('){
-        char par;
-        ss >> par;
-        r = parsePrio1(ss);
-        if (ss.peek() != ')')
-            throw (int) ss.tellg();
-        ss >> par;
-    } else if (is_numeric(ss.peek())){
-        int nom;
-        ss >> nom;
-        r = {nom, 1};
-    } else if (ss.peek() == 'M'){
-        char M;
-        ss >> M;
-        if (!is_numeric(ss.peek()))
-            throw (int) ss.tellg();
-        int index;
-        ss >> index;
-        if (index >= memory.size())
-            throw (int) ss.tellg();
-        r = memory[index];
-    } else
-        throw (int) ss.tellg();
-
-    while (OPERATORS_PRIO3.find_first_of(ss.peek()) != std::string::npos){
-        char op;
-        switch (ss.peek()) {
-            case('^'):
-                ss >> op;
-                r = r.pow(parsePrio3(ss));
-                break;
-        default:
-            break;
-        }
-    }
-//    std::cout << "asd";
-    return r;
-}
 
 
 MainWindow::~MainWindow()

@@ -21,6 +21,10 @@ rational &rational::operator-=(const rational &r){
     nom = (lcm / denom) * nom - (lcm / r.denom) * r.nom ;
     denom = lcm;
 
+    int gcd = std::gcd(nom, denom);
+    nom /= gcd;
+    denom /= gcd;
+
     if (nom == denom){
         nom = 1;
         denom = 1;
