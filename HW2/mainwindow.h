@@ -37,6 +37,7 @@ private:
     rational parse_input(std::stringstream&);
     void showResult();
     void addMem();
+    QString getNumStr(rational);
 
 
 signals:

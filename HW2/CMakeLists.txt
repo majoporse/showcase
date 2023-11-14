@@ -93,8 +93,8 @@ set_target_properties(HW2 PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(tests PRIVATE Qt${QT_VERSION_MAJOR}::Widgets gtest_main)
-#target_link_libraries(tests gtest_main)
+target_link_libraries(tests PRIVATE Qt${QT_VERSION_MAJOR}::Widgets )
+target_link_libraries(tests PRIVATE gtest_main)
 target_link_libraries(HW2 PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 add_test(NAME tests COMMAND tests)
