@@ -109,3 +109,6 @@ CMakeLists.txt.user*
 googletest
 *local*
 # End of https://www.toptal.com/developers/gitignore/api/qt,qtcreator,cmake
+*autogen*
+build-HW2-Desktop-Debug googletest
+*.idea*
