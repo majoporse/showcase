@@ -5,24 +5,28 @@
 #include <map>
 #include <functional>
 
+using std::ranges::any_of;
+
 bool database::add_company(std::string name, std::string short_name, int ico){
-    if (std::ranges::any_of(companies, [&](company &c){return c.name == name || c.ico == ico;}))
-        return false;
     std::unique_lock<std::shared_mutex> lock(m);
+    if (any_of(companies, [&](company &c){return c.name == name || c.ico == ico;}))
+        return false;
     companies.emplace_back(name, short_name, ico);
     return true;
 }
 
 bool database::add_invoice(int id, int ico_exhibitor, int ico_customer, int price, int vat){
-    if (std::ranges::any_of(invoices, [&](invoice &i){return i.id == id;}))
-        return false;
     std::unique_lock<std::shared_mutex> lock(m);
+    if (any_of(invoices, [&](invoice &i){return i.id == id;}) && !any_of(companies, [&](company &c){return c.ico == ico_exhibitor;}))
+        return false;
     invoices.emplace_back(id, ico_exhibitor, ico_customer, price, vat);
     return true;
 }
 
 bool database::add_vat_payment(int ico, int type, int price){
     std::unique_lock<std::shared_mutex> lock(m);
+    if (!any_of(companies, [&](company&c){return c.ico == ico;}))
+        return false;
     payments.emplace_back(ico, type, price);
     return true;
 }

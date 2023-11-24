@@ -76,7 +76,7 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
         int ico;
         ss >> name >> short_name >> ico;
         if (!ss){
-            out << "erroro!\n";
+            out << "error parsing: add company <???>\n";
             return;
         }
         data.add_company(name, short_name, ico);
@@ -87,7 +87,7 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
         int id, ico_exhibitor, ico_customer, price, vat;
         ss >> id >> ico_exhibitor >> ico_customer >> price >> vat;
         if (!ss){
-            out << "erroro!\n";
+            out << "error parsing: add invoice <???>\n";
             return;
         }
         data.add_invoice(id, ico_exhibitor, ico_customer, price, vat);
@@ -102,7 +102,7 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
         std::string type;
         ss >> id >> type >> price;
         if (!ss){
-            out << "erroro!\n";
+            out << "error parsing: add vat-payment <???>!\n";
             return;
         }
 
@@ -114,7 +114,7 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
         print_msg(out, QString{"added VAT payment: "} + QString::number(id) + ' ' +
                        type.data() + ' ' + QString::number(price) + '\n', client + ": ", print);
     } else{
-        out << "error parsing!\n";
+        out << "error parsing: add <???>\n";
     }
 }
 
@@ -149,6 +149,8 @@ void Server::parse_get(std::stringstream &ss, QTextStream& out, const QString &n
             auto [ num1, num2 ] = data.total_movement(ico1, ico2);
             print_msg(out, QString{"total movement: "} + QString::number(num1) + " - " +
                            QString::number(num2) + '\n', name + ": requested ", print);
+        } else{
+            out << "error parsing: total <???>!\n";
         }
 
     } else if (subject == "vat-by"){
@@ -168,19 +170,23 @@ void Server::parse_get(std::stringstream &ss, QTextStream& out, const QString &n
                 return;
             print_msg(out, QString{"vat-by added: "} + QString::number(data.get_added_vat(ico)) + '\n',
                       name + ": requested ", print);
+        } else {
+            out << "error parsing: total vat-by <???>\n";
         }
 
     } else if (subject == "unpaid"){
         std::string filler;
         ss >> filler;
         int ico;
-        if (filler != "vat" || !parse_ico(ss, out, ico))
+        if (filler != "vat" || !parse_ico(ss, out, ico)){
+            out << "error parsing: get unpaid <???>\n";
             return;
+        }
         int num = data.get_unpaid_vat(ico);
         print_msg(out, QString{""} + QString::number(num) + '\n',
                   name + ": requested unpaid vat", print);
     } else {
-        out << "error parsing!\n";
+        out << "error parsing: get <???>\n";
     }
 }
 
@@ -196,7 +202,7 @@ void Server::parse_list(std::stringstream &ss, QTextStream& out){
     } else if (listing == "dsc"){
         sorted = data.get_companies(true);
     } else{
-        out << "error parsing!\n";
+        out << "error parsing: list-by <???>\n";
         return;
     }
     std::ranges::for_each(sorted, [&](auto a){
@@ -229,7 +235,8 @@ auto angry_pepe = R"(
 ⠀⠀⠀⠀⠀⠀⠈⠉⠉⠛⠛⠿⠷⣶⣦⣴⡿⢿⣿⡤⠖⡟⠁⠀⠀⠀⠀⠀⠀⢀⣀⣠⣴⡾⠋⠉⠀⢸⣿⡇⠀⠀⠀⠀⠐⢑⠀⠀⠈⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⡴⠟⠁⠀⠀⠀⠀⠾⠭⢍⣉⡉⠉⠉⠉⠉⠉⠁⠙⠻⣷⣄⠀⠀⠘⣸⡇⠀⠄⠂⠀⠀⠀⠀⠐⠠⢀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠔⠊⠁⠀⠀⠀⠀⠀⠀⣀⣠⠤⠖⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⢷⣜⠿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠄⠘
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣨⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣇⠀⠀⠀⠀⠀⠀⠰⠀⠀⠀⠀⠀)";
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣨⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠹⣇⠀⠀⠀⠀⠀⠀⠰⠀⠀⠀⠀⠀
+)";
 
 void Server::handleInput(QSocketDescriptor desc, QSocketNotifier::Type){
     if (!desc.isValid()) {
@@ -258,6 +265,7 @@ void Server::handleInput(QSocketDescriptor desc, QSocketNotifier::Type){
         return;
     } else {
         std::cout << angry_pepe;
+        std::cout.flush();
     }
     output.flush();
 }
