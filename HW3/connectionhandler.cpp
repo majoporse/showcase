@@ -25,7 +25,7 @@ void ConnectionHandler::run()
             return;
         }
         QString line = ts.readAll();
-        qDebug() << "line: " << line;
+        // qDebug() << "line: " << line;
         std::string action;
         std::stringstream ss;
         ss << line.toStdString();
