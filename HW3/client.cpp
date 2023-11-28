@@ -27,14 +27,12 @@ int main(int argc, char *argv[])
     sock.waitForBytesWritten();
 
     for (std::string cur_line;std::getline(std::cin, cur_line) && sock.state() == QAbstractSocket::ConnectedState;){
-        ts << cur_line.data();
+        ts << cur_line.data() << '\n';
         ts.flush();
-//        sock.waitForBytesWritten();
+        sock.waitForBytesWritten();
 
         sock.waitForReadyRead();
-//            std::cout << "Timed out!\n";
-//            return 0;
-//        }
+
         QString s = ts.readAll();
         std::cout << s.toStdString();
     }

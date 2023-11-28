@@ -24,7 +24,8 @@ void ConnectionHandler::run()
         if (sock.state() != QAbstractSocket::ConnectedState) {
             return;
         }
-        QString line = ts.readLine();
+        QString line = ts.readAll();
+        qDebug() << "line: " << line;
         std::string action;
         std::stringstream ss;
         ss << line.toStdString();

@@ -79,9 +79,12 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
             out << "error parsing: add company <???>\n";
             return;
         }
-        data.add_company(name, short_name, ico);
-        print_msg(out, QString{"added company: "} + name.data() + ' ' +
+        
+        if (data.add_company(name, short_name, ico))
+            print_msg(out, QString{"added company: "} + name.data() + ' ' +
                        short_name.data() + ' ' + QString::number(ico) + '\n', client + ": ", print);
+        else 
+            out << "error adding company\n";
 
     } else if (subject == "invoice"){
         int id, ico_exhibitor, ico_customer, price, vat;
@@ -90,12 +93,14 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
             out << "error parsing: add invoice <???>\n";
             return;
         }
-        data.add_invoice(id, ico_exhibitor, ico_customer, price, vat);
-        print_msg(out, QString("added invoice: ") + QString::number(id) + ' ' + //it really wants to call QString(char) :/
+        if (data.add_invoice(id, ico_exhibitor, ico_customer, price, vat))
+            print_msg(out, QString("added invoice: ") + QString::number(id) + ' ' + //it really wants to call QString(char) :/
                                                     QString::number(ico_exhibitor) + ' ' +
                                                     QString::number(ico_customer) + ' ' +
                                                     QString::number(price) + ' ' +
                                                     QString::number(vat) + '\n', client + ": ", print);
+        else
+            out << "error adding invoice\n";
 
     } else if (subject == "vat-payment"){
         int id, price;
@@ -105,14 +110,17 @@ void Server::parse_add(std::stringstream &ss, QTextStream& out, const QString &c
             out << "error parsing: add vat-payment <???>!\n";
             return;
         }
-
+        bool added = false;
         if (type == "added"){
-            data.add_vat_payment(id, VAT_ADDED_T, price);
+            added = data.add_vat_payment(id, VAT_ADDED_T, price);
         } else if (type == "profit"){
-            data.add_vat_payment(id, VAT_PROFIT_T, price);
+            added = data.add_vat_payment(id, VAT_PROFIT_T, price);
         }
-        print_msg(out, QString{"added VAT payment: "} + QString::number(id) + ' ' +
+        if (added)
+            print_msg(out, QString{"added VAT payment: "} + QString::number(id) + ' ' +
                        type.data() + ' ' + QString::number(price) + '\n', client + ": ", print);
+        else
+            out << "error adding VAT payment\n";
     } else{
         out << "error parsing: add <???>\n";
     }
