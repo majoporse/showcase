@@ -18,7 +18,7 @@ add
     invoie <id> <ico_exhibitor> <ico_customer> <price> <vat>
     vat-payment <id> <type> <price> -->
 
-```markdown
+
 # Client Activation and Supported Commands
 
 ## How to Activate Client
