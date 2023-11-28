@@ -65,16 +65,19 @@ public:
     bool add_invoice(int ico, int ico_exhibitor, int ico_customer, int price, int vat);
     bool add_vat_payment(int ico, int type, int price);
 
-    int get_paid_vat_invoice(int, bool is_locked = false) const;
     int get_added_vat(int, bool is_locked = false) const;
     int get_profit_vat(int, bool is_locked = false) const;
-    int get_paid_vat_payment(int, bool is_locked = false) const;
-    int total_income(int, bool is_locked = false) const;
-    int total_costs(int, bool is_locked = false) const;
-    int total_profit(int, bool is_locked = false) const;
     int get_unpaid_vat(int, bool is_locked = false) const;
     std::tuple<int, int> total_movement(int, int) const;
     std::vector<std::tuple<int, int>> get_companies(bool) const;
+    
+    //helper functions
+    int get_paid_vat_invoice(int, bool is_locked = false) const;
+    int get_paid_vat_payment(int, bool is_locked = false) const;
+    
+    int total_income(int, bool is_locked = false) const;
+    int total_costs(int, bool is_locked = false) const;
+    int total_profit(int, bool is_locked = false) const;
 
     int movement_from_to(int, int) const;
 };

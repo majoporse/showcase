@@ -17,7 +17,7 @@ bool database::add_company(std::string name, std::string short_name, int ico){
 
 bool database::add_invoice(int id, int ico_exhibitor, int ico_customer, int price, int vat){
     std::unique_lock<std::shared_mutex> lock(m);
-    if (any_of(invoices, [&](invoice &i){return i.id == id;}) && !any_of(companies, [&](company &c){return c.ico == ico_exhibitor;}))
+    if (any_of(invoices, [&](invoice &i){return i.id == id;}) || !any_of(companies, [&](company &c){return c.ico == ico_exhibitor;}))
         return false;
     invoices.emplace_back(id, ico_exhibitor, ico_customer, price, vat);
     return true;
@@ -48,7 +48,7 @@ int database::get_added_vat(int ico, bool is_locked)const{
 int database::get_profit_vat(int ico, bool is_locked) const{
     if (!is_locked)
         std::shared_lock<std::shared_mutex> lock(m);
-    return (total_income(ico, true) - total_costs(ico, true)) * VAT_PROFIT;
+    return total_profit(ico, true) * VAT_PROFIT;
 }
 
 int database::get_paid_vat_payment(int ico, bool is_locked) const{
@@ -77,7 +77,8 @@ int database::get_paid_vat_invoice(int ico, bool is_locked) const{
 int database::total_profit(int ico, bool is_locked) const{
     if (!is_locked)
         std::shared_lock<std::shared_mutex> lock(m);
-    return total_income(ico, true) - total_costs(ico, true);
+    int res = total_income(ico, true) - total_costs(ico, true);
+    return res > 0 ? res : 0;
 }
 
 int database::total_income(int ico, bool is_locked) const{
@@ -114,7 +115,7 @@ inline int database::movement_from_to(int ico, int ico2) const{
     };
     std::ranges::for_each(invoices, fun);
     return movement;
-} 
+}
 
 std::tuple<int, int> database::total_movement(int ico, int ico2) const{
     std::shared_lock<std::shared_mutex> lock(m);
