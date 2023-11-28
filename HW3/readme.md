@@ -49,6 +49,10 @@ The client and server support the following commands:
 
 ### Unpaid Vat
 
+### list-by
+ - #### asc
+ - #### dsc
+
 ### Add
 
 - #### Company
