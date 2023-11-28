@@ -71,23 +71,23 @@ The client and server support the following commands:
 ### Get Total Income
 
 ```bash
-./client get total income
+get total income
 ```
 
 ### Add a Company
 
 ```bash
-./client add company ABCCompany ABC ABC123
+ add company ABCCompany ABC ABC123
 ```
 
 ### Add an Invoice
 
 ```bash
-./client add invoice 001 ABCExhibitor XYZCustomer 100.00 20.00
+add invoice 001 ABCExhibitor XYZCustomer 100.00 20.00
 ```
 
 ### Make a VAT Payment
 
 ```bash
-./client add vat-payment 001 online 30.00
+add vat-payment 001 online 30.00
 ```
