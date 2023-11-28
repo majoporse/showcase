@@ -17,7 +17,9 @@ bool database::add_company(std::string name, std::string short_name, int ico){
 
 bool database::add_invoice(int id, int ico_exhibitor, int ico_customer, int price, int vat){
     std::unique_lock<std::shared_mutex> lock(m);
-    if (any_of(invoices, [&](invoice &i){return i.id == id;}) || !any_of(companies, [&](company &c){return c.ico == ico_exhibitor;}))
+    if (any_of(invoices, [&](invoice &i){return i.id == id;}) || 
+        !any_of(companies, [&](company &c){return c.ico == ico_exhibitor;}) ||
+        !any_of(companies, [&](company &c){return c.ico == ico_customer;}) )
         return false;
     invoices.emplace_back(id, ico_exhibitor, ico_customer, price, vat);
     return true;

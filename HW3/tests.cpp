@@ -12,6 +12,8 @@ TEST(databaseTest, insert_invoice) {
     database d;
     EXPECT_FALSE(d.add_invoice(11,1,2,1000,210));
     EXPECT_TRUE(d.add_company("c1", "c1", 1));
+    EXPECT_FALSE(d.add_invoice(1,1,22,1000,210));
+    EXPECT_TRUE(d.add_company("c2", "c2", 2));
     EXPECT_TRUE(d.add_invoice(1,1,2,1000,210));
     EXPECT_FALSE(d.add_invoice(1,1,2,1000,210));
 }
