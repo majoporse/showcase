@@ -221,7 +221,7 @@ public:
 };
 
 
-client::client(QWidget &mainWindow)
+client::client(QWidget &mainWindow, QString serverUrl): serverUrl{serverUrl}
 {
     manager = new QNetworkAccessManager();
     connect(manager, &QNetworkAccessManager::finished, this, &client::processReply);
@@ -325,7 +325,8 @@ client::client(QWidget &mainWindow)
     itemsView->setItemDelegate(delegate);
 
     imageLabel = new QLabel;
-    imageLabel->setPixmap(QPixmap{"/home/user/p-233958-full.jpg"}.scaledToWidth(200));
+    auto reply = manager->get( QNetworkRequest(QUrl("https://mrtns.sk/tovar/_xl/2228/xl2228657.jpg?v=17004114482")));
+    reply->setProperty("type", STATE);
 
     imageLabel->setAlignment(Qt::AlignCenter);
     imageLabel->setStyleSheet(desclabelStyle);
@@ -403,10 +404,10 @@ client::client(QWidget &mainWindow)
         labels.remove(0, 8);
         labelLabel->setText("Labels: ");
 
-        auto request = QNetworkRequest(QUrl(QString("http://localhost:8080") + "/add;" + time + ";" + labels));
+        auto request = QNetworkRequest(QUrl(QString(serverUrl) + "/add;" + time + ";" + labels));
         request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");  // Set the content type
 
-        qDebug() << QString("http://localhost:8080") + "/add;" + time + ";" + labels;
+        qDebug() << QString(serverUrl) + "/add;" + time + ";" + labels;
 
         auto *reply = manager->post(request, url.toUtf8());
         reply->setProperty("type", ADD);
@@ -421,7 +422,7 @@ client::client(QWidget &mainWindow)
             return;
         }
         if (radioButton->isChecked()){
-            auto request = QNetworkRequest(QUrl(QString("http://localhost:8080") + "/remove"));
+            auto request = QNetworkRequest(QUrl(QString(serverUrl) + "/remove"));
             request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");  // Set the content type
             auto *reply = manager->post(request, url.toUtf8());
             reply->setProperty("type", REMOVE);
@@ -434,10 +435,10 @@ client::client(QWidget &mainWindow)
         QString url = teAddStram->toPlainText();
         teAddStram->clear();
 
-        auto request = QNetworkRequest(QUrl(QString("http://localhost:8080") + "/feed"));
+        auto request = QNetworkRequest(QUrl(QString(serverUrl) + "/feed"));
         request.setHeader(QNetworkRequest::ContentTypeHeader, "text/plain");  // Set the content type
 
-        qDebug() << QString("http://localhost:8080") + "/feed";
+        qDebug() << QString(serverUrl) + "/feed";
 
         auto *reply = manager->post(request, url.toUtf8());
         reply->setProperty("type", FETCH);
@@ -458,7 +459,7 @@ void client::clearDetails(){
 void client::parseDom(const QDomElement &element, QNetworkReply *reply){
     QDomElement cur = element;
     cur = cur.firstChildElement();
-    qDebug() << cur.tagName();
+    qDebug() << cur.tagName(); //should be channel
     auto item = new QStandardItem;
     item->setData(QString{"Title:\n"} + cur.elementsByTagName("title").at(0).toElement().text(), Qt::DisplayRole); //title
     item->setData(QString{"Link:\n"} + cur.elementsByTagName("link").at(0).toElement().text(), Qt::UserRole); //link
@@ -548,6 +549,7 @@ void client::changeDetails(int row, QNetworkReply *reply){
 void client::processReply(QNetworkReply *reply){
 
     QMessageBox box;
+    QPixmap p;
     QErrorMessage msg;
     if (reply->error() != QNetworkReply::NoError){
         msg.showMessage(reply->errorString());
@@ -575,8 +577,9 @@ void client::processReply(QNetworkReply *reply){
         break;
 
     case STATE:
+        p.loadFromData(reply->readAll());
+        imageLabel->setPixmap(p.scaledToWidth(200));
         break;
-
     case IMAGE:
         changeDetails(reply->property("cur").toInt(), reply);
         break;

@@ -19,8 +19,8 @@ class client: public QObject
 {
     Q_OBJECT
     std::vector<QDomDocument> docs;
-
     QString serverUrl;
+
     QNetworkAccessManager *manager;
     QStandardItemModel *streams;
     std::vector<QStandardItemModel *>vecItems;
@@ -56,7 +56,7 @@ class client: public QObject
     void changeDetails(int index, QNetworkReply *reply);
 
 public:
-    client(QWidget &);
+    client(QWidget &, QString);
 
 public slots:
     void processReply(QNetworkReply*);
