@@ -18,8 +18,6 @@ Notepad-- is a **desktop text editor** designed to provide comprehensive text fi
 
 Key functionalities include customizable **undo/redo steps** (configurable in settings) and standard editor features like **keyboard shortcuts**. These shortcuts facilitate efficient navigation (e.g., arrow key movement, Ctrl + arrow key jumps), text selection (Shift + arrow keys), and common operations like **copy, paste, cut, undo, and redo**. Additionally, the editor includes a robust **find and replace** functionality.
 
-A unique feature of Notepad-- is its **"live share" mode**. This mode allows users to create a watch session, generating a unique code and password. Other instances of the application can then connect to this session to monitor code in real-time. The implementation of this mode (whether cloud-based or P2P) was left to our discretion. The application also supports **multiple UI themes** for a personalized user experience.
-
 ---
 
 ### **Implemented Functionality**
