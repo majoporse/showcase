@@ -1,0 +1,75 @@
+{
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true
+    },
+    "http-development": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:6969/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "API_PORT": "6969",
+        "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=juiceworld;Username=postgres;Password=postgres",
+        "LOGGING_DB_DATABASE_NAME": "juiceworld",
+        "LOGGING_DB_COLLECTION_NAME": "logs",
+        "LOGGING_DB_CONNECTION_STRING": "mongodb://root:root@localhost:27017"
+      },
+      "dotnetRunMessages": true
+    },
+    "https": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      },
+      "dotnetRunMessages": true
+    },
+    "https-development": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:6969/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "API_PORT": "6969",
+        "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=juiceworld;Username=postgres;Password=postgres",
+        "LOGGING_DB_DATABASE_NAME": "juiceworld",
+        "LOGGING_DB_COLLECTION_NAME": "logs",
+        "LOGGING_DB_CONNECTION_STRING": "mongodb://root:root@localhost:27017"
+      },
+      "dotnetRunMessages": true
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Production"
+      }
+    },
+    "IIS Express-development": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "launchUrl": "https://localhost:6969/swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "API_PORT": "6969",
+        "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=juiceworld;Username=postgres;Password=postgres",
+        "LOGGING_DB_DATABASE_NAME": "juiceworld",
+        "LOGGING_DB_COLLECTION_NAME": "logs",
+        "LOGGING_DB_CONNECTION_STRING": "mongodb://root:root@localhost:27017",
+        "JWT_SECRET": "bAafd@A7d9#@F4*V!LHZs#ebKQrkE6pad2f3kj34c3dXy@"
+      }
+    }
+  },
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:58623/",
+      "sslPort": 44353
+    }
+  }
+}

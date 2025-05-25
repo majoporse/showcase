@@ -1,0 +1,102 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.ReviewService ReviewService
+@inject NavigationManager NavigationManager
+
+<MudCard Elevation=7 Style="@($"border-color: {Colors.DeepPurple.Default}; width: 500px; max-height: 700px; border-radius: 1.5rem")" Class="border-2">
+    <header class="flex-row d-flex align-items-center pa-3">
+        <MudButton Class="rounded-circle mr-3">
+            <MudImage Src="@user.ProfilePicUrl" Alt="Profile picture" Style="width: 50px; height: 50px" Class="rounded-circle" 
+            @onclick="@(() => NavigationManager.NavigateTo($"/user/{review.UserId}"))" />
+        </MudButton>
+
+        <MudText Typo="Typo.h6" Class="align-content-center">@user.Name</MudText>
+
+        @if (owner)
+        {
+            @if (editMode)
+            {
+                <MudButtonGroup Class="ml-auto">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled"
+                                   Color="Color.Secondary" @onclick="DeleteReview"></MudIconButton>
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Variant="Variant.Filled"
+                                   Color="Color.Secondary" @onclick="EditReview"></MudIconButton>
+                </MudButtonGroup>
+            }
+            else
+            {
+                <MudIconButton Class="ml-auto rounded-3" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text"
+                               Size="Size.Medium" OnClick="OpenReview"></MudIconButton>
+            }
+        }
+    </header>
+    <MudDivider DividerType="DividerType.Middle" Class="border-secondary" />
+
+    <MudPaper Class="ma-5" Elevation=0>
+        @if (editMode)
+		{
+			<MudTextField Variant="Variant.Outlined" Label="Edit Review" @bind-Value="review.Content" Lines="3"/>
+		}
+		else
+		{
+			<MudText Typo="Typo.body1" Class="px-1" Style=" word-wrap: break-word; ">@review.Content</MudText>
+		}
+    </MudPaper>
+    <MudCardActions class="d-flex justify-content-between w-100 pa-4">
+        @if (review.EditedAt != null)
+        {
+            <MudText Typo="Typo.body2">Edited: @review.EditedAt?.ToShortTimeString()</MudText>
+        }
+        else
+        {
+        <MudText Typo="Typo.body2">Posted: @review.CreatedAt.ToShortTimeString()</MudText>
+        }
+        <MudRating SelectedValue="review.Rating" MaxValue="10" Color="Color.Secondary" ReadOnly="!editMode" SelectedValueChanged="ChangeRating" /> 
+    </MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter]
+    public Review review { get; set; } = new();
+
+    [Parameter]
+    public EventCallback refresh { get; set; }
+
+    [CascadingParameter]
+    protected Task<AuthenticationState>? authenticationState { get; set; }
+
+    private User user = new();
+
+    private bool owner = false;
+    private bool editMode = false;
+
+    private void ChangeRating(int rating) => review.Rating = rating;
+    private void OpenReview() => editMode = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await authenticationState!;
+
+        string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+        user = review.User;
+        if (int.Parse(userId) == review.UserId)
+        {
+            owner = true;
+        }
+    }
+
+    private async void EditReview()
+	{
+		editMode = false;
+        review.EditedAt = DateTime.Now;
+        await ReviewService.UpdateReviewAsync(review);
+	}
+
+    private async void DeleteReview()
+    {
+        await ReviewService.DeleteReviewAsync(review);
+        await refresh.InvokeAsync();
+    }
+}

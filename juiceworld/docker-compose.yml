@@ -1,0 +1,82 @@
+services:
+  juiceworld-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
+    image: ${IMAGE_REPOSITORY:-juiceworld}/api:${IMAGE_TAG_EXTENDED:-latest}
+    container_name: juiceworld-dev
+    restart: always
+    stdin_open: true
+    tty: true
+    ports:
+      - ${API_PORT:-6969}:${API_PORT:-6969}
+    environment:
+      - API_PORT=${API_PORT:-6969}
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+    depends_on:
+      - postgres
+      - mongodb
+    volumes:
+      - ${PWD}:/home/juiceworld
+
+  juiceworld-mvc-deploy:
+    build:
+      context: .
+      dockerfile: PresentationLayer.Mvc/Dockerfile-deploy
+    image: ${IMAGE_REPOSITORY:-juiceworld}/mvc:${IMAGE_TAG_EXTENDED:-latest}
+    container_name: juiceworld-mvc-deploy
+    restart: always
+    ports:
+      - ${MVC_PORT:-7137}:${MVC_PORT:-7137}
+    environment:
+      - MVC_PORT=${MVC_PORT:-7137}
+      - DB_CONNECTION_STRING=${DB_CONNECTION_STRING}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - postgres
+      - mongodb
+
+  postgres:
+    image: postgres:alpine3.19
+    container_name: juiceworld-postgres-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+
+  reverse-proxy:
+    build:
+      context: .
+      dockerfile: reverse-proxy/Dockerfile
+    container_name: juiceworld-reverse-proxy
+    image: ${IMAGE_REPOSITORY:-juiceworld}/reverse-proxy:${REVERSE_PROXY_IMAGE_VERSION_TAG:-latest}
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - juiceworld-mvc-deploy
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    ports:
+      - "10000:10000" # Blob service
+      - "10001:10001" # Queue service
+      - "10002:10002" # Table service
+    volumes:
+      - ./data:/data # Persist data locally
+    command: "azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --tableHost 0.0.0.0 --location /data --debug /data/debug.log"

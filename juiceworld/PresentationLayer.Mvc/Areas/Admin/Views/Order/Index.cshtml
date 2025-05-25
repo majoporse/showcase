@@ -1,0 +1,52 @@
+@using BusinessLayer.DTOs
+@using PresentationLayer.Mvc
+@model Infrastructure.QueryObjects.FilteredResult<PresentationLayer.Mvc.Areas.Customer.Models.OrderViewModel>
+
+@{
+    ViewData[Constants.Keys.Title] = "Orders";
+    var startPage = Math.Max(1, Model.PageIndex - 5);
+    var endPage = Math.Min(Model.TotalPages, Model.PageIndex + 5);
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>User ID</th>
+            <th>Order Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var order in Model.Entities)
+        {
+            <tr>
+                <td>@order.Id</td>
+                <td>@order.UserId</td>
+                <td>@order.Status</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Order", new { id = order.Id })" class="btn btn-info">Edit</a>
+                    <form method="post" asp-action="Delete" asp-controller="Order" asp-route-id="@order.Id"
+                          class="d-inline"
+                          onsubmit="return confirm(`Are you sure you want to delete order: @order.Id`);">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @for (var i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new PaginationDto { PageIndex = i })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>

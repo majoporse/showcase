@@ -1,0 +1,19 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0
+
+LABEL maintainer="bilanin@mail.muni.cz"
+
+RUN groupadd -g 999 juiceworld && \
+    useradd -r -u 999 -g juiceworld -m -s /bin/bash juiceworld && \
+    apt-get update && \
+    apt-get install -y sudo && \
+    echo "juiceworld ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+
+ENV HOME=/home/juiceworld
+
+USER juiceworld
+WORKDIR $HOME
+CMD /bin/bash

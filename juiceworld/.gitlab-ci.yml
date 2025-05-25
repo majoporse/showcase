@@ -1,0 +1,97 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+stages:
+  - build
+  - quality
+
+### RULES
+.release_rules:
+  rules:
+    - if: $CI_COMMIT_TAG != null
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'web'
+      when: manual
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: manual
+      allow_failure: true
+
+.debug_rules:
+  rules:
+    - if: $CI_COMMIT_TAG != null
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'web'
+      when: manual
+    - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+      when: on_success
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: on_success
+      allow_failure: true
+
+.deploy_rules:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "web"
+      when: manual
+      allow_failure: true
+
+### BUILD
+.build-template:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  tags:
+    - shared-fi
+  script:
+    - dotnet restore
+    - dotnet build --configuration $CONFIGURATION
+
+build-debug:
+  extends:
+    - .build-template
+    - .debug_rules
+  variables:
+    CONFIGURATION: Debug
+
+build-release:
+  extends:
+    - .build-template
+    - .release_rules
+  variables:
+    CONFIGURATION: Release
+
+### QUALITY
+format-check:
+  extends:
+    - .debug_rules
+  stage: quality
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  tags:
+    - shared-fi
+  script:
+    - dotnet format --verify-no-changes
+
+.test-template:
+  stage: quality
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  tags:
+    - shared-fi
+  script:
+    - dotnet restore
+    - dotnet test --configuration $CONFIGURATION
+
+test-debug:
+    extends:
+        - .test-template
+        - .debug_rules
+    variables:
+        CONFIGURATION: Debug
+
+test-release:
+    extends:
+        - .test-template
+        - .release_rules
+    variables:
+        CONFIGURATION: Release

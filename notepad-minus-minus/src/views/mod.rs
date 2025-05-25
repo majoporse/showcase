@@ -1,0 +1,9 @@
+pub mod dialogs;
+pub mod edit_history;
+pub mod editor;
+pub mod file_explorer;
+pub mod find_replace;
+pub mod sessionexplorer;
+pub mod side_panel;
+pub mod tabs;
+pub mod terminal;

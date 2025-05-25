@@ -1,0 +1,54 @@
+﻿@layout SigninLayout
+@using BlazorServerAuthenticationAndAuthorization.Commons
+@using BlazorServerAuthenticationAndAuthorization.models
+@using System.Linq
+@inject NavigationManager navigationManager
+@inject PowerPalsServices.GymService gymService
+@using System.Security.Claims
+@using powerPalsDb.Models
+
+<MudPaper Class="mt-5 w-40" Elevation="0">
+	<MudTextField @bind-Value="@searchparam" Label="Pick a GYM"
+				Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" />
+	<MudPaper Style="overflow: auto; height: 40vh; scrollbar-width: none;" Elevation="0">
+		<ItemList Items="@(gyms.Select(g => new Preview { Id = g.Id, Name = g.Name, ImageUrl = g.ImageUrl }).ToList())" onClick="@(Register)" />
+	</MudPaper>
+	<MudButtonGroup Class="mt-3" Style="width: 100%;" OverrideStyles="false">
+		<MudButton Variant="Variant.Filled" Color="Color.Primary" Class="flex-grow-1"
+				   OnClick="@(() => navigationManager.NavigateTo("/home", true))">SKIP</MudButton>
+
+		<MudButton Variant="Variant.Filled" Color="Color.Warning" Class="flex-grow-1"
+				   OnClick="@(() => navigationManager.NavigateTo("/sign-in/create-gym", true))">Create a GYM</MudButton>
+	</MudButtonGroup>
+</MudPaper>
+
+@code {
+	[CascadingParameter]
+	protected Task<AuthenticationState>? authenticationState { get; set; }
+
+	private string searchparam = "";
+
+	private int userId = -1;
+
+	private List<Gym> gyms = new();
+
+	private async Task GetGyms()
+	{
+		gyms = searchparam != "" ? await gymService.GetGymsByNameAsync(searchparam) : await gymService.GetGymsAsync();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		var state = await authenticationState!;
+
+		string _userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+		userId = int.Parse(_userId);
+		await GetGyms();
+	}
+
+	private async void Register(int gmyId)
+	{
+		await gymService.AddGymGoerAsync(userId, gmyId);
+		navigationManager.NavigateTo("/home", true);
+	}
+}

@@ -1,0 +1,40 @@
+﻿@page "/sign-in/bio"
+@layout SigninLayout
+@using System.ComponentModel.DataAnnotations
+@using BlazorServerAuthenticationAndAuthorization.models
+@using powerPalsDb.Models
+
+@inject NavigationManager navigationManager
+
+<EditForm Model="@additionalDetailsModel" OnValidSubmit="OnValidSubmit" class="w-50 d-flex flex-column align-items-center mt-5">
+    <DataAnnotationsValidator />
+    <MudCardContent class="w-50">
+        <MudTextField @bind-Value="additionalDetailsModel.bio" Label="BIO" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                        Immediate="true" Placeholder="type here" Lines="3" 
+                        HelperText="@("Max 420 characters. Current: " + additionalDetailsModel.bio.Length)" For="@(() => additionalDetailsModel.bio)" />
+        <MudTextField @bind-Value="additionalDetailsModel.ImageUrl" Label="IAMGE URL" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                      Immediate="true" Placeholder="type here"
+                      HelperText="Enter a valid URL" For="@(() => additionalDetailsModel.ImageUrl)" />
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                   Color="Color.Primary" Class="ml-auto">Register</MudButton>
+    </MudCardActions>
+</EditForm>
+
+@code {
+    [Parameter]
+    public User user { get; set; } = new();
+
+    [Parameter]
+    public Action onClick { get; set; }
+
+    private AdditionalDetailsModel additionalDetailsModel { get; set; } = new();
+
+    private void OnValidSubmit(EditContext context)
+    {
+        user.Bio = additionalDetailsModel.bio;
+        user.ProfilePicUrl = additionalDetailsModel.ImageUrl;
+        onClick();
+    }
+}

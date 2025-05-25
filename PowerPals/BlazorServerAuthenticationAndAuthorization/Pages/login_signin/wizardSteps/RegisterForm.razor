@@ -1,0 +1,45 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using powerPalsDb.Models
+
+@inject NavigationManager navigationManager
+
+<EditForm Model="@RegisterModel" OnValidSubmit="OnValidSubmit" class="w-50 d-flex flex-column align-items-center">
+    <DataAnnotationsValidator />
+        <MudCardContent class="w-50" >
+            <MudTextField Label="First name" HelperText="Max. 8 characters" Variant="Variant.Outlined"
+                            @bind-Value="RegisterModel.Username" For="@(() => RegisterModel.Username)" />
+            <MudTextField Label="Email" Class="mt-3" Variant="Variant.Outlined"
+                            @bind-Value="RegisterModel.Email" For="@(() => RegisterModel.Email)" HelperText="Enter a valid email address"/>
+            <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3" Variant="Variant.Outlined"
+                            @bind-Value="RegisterModel.Password" For="@(() => RegisterModel.Password)" InputType="InputType.Password" />
+            <MudTextField Label="Password" HelperText="Repeat the password" Class="mt-3" Variant="Variant.Outlined"
+                            @bind-Value="RegisterModel.Password2" For="@(() => RegisterModel.Password2)" InputType="InputType.Password" />
+        </MudCardContent>
+        <MudCardActions>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+            Color="Color.Primary" Class="ml-auto">Register</MudButton>
+        </MudCardActions>
+        <MudItem xs="12">
+            <MudText Typo="Typo.body2" Align="Align.Center">
+                Fill out the form correctly to register.
+            </MudText>
+        </MudItem>
+</EditForm>
+
+@code {
+    [Parameter]
+    public User user { get; set; } = new();
+
+    [Parameter]
+    public Action onClick { get; set; }
+
+    private RegisterAccountForm RegisterModel { get; set; } = new();
+
+    private void OnValidSubmit(EditContext context)
+    {
+        user.Name = RegisterModel.Username;
+        user.Email = RegisterModel.Email;
+        user.Password = RegisterModel.Password;
+        onClick();
+    }
+}

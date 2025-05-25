@@ -1,0 +1,94 @@
+@using System.Security.Claims
+@using BusinessLayer.Services
+@using Commons.Enums
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using PresentationLayer.Mvc
+@model PresentationLayer.Mvc.Areas.Customer.Models.ProductDetailViewModel
+
+@{
+    ViewData[Constants.Keys.Title] = Model.ProductDetail.Name;
+    int.TryParse(User.FindFirstValue(ClaimTypes.Sid) ?? string.Empty, out var userId);
+    var isAuthenticated = User.Identity is { IsAuthenticated: true };
+    var isAdmin = User.IsInRole(UserRole.Admin.ToString());
+}
+
+<!-- Link to the CSS file -->
+<link rel="stylesheet" href="~/css/product-details.css" />
+
+<h1>@Model.ProductDetail.Name</h1>
+
+<div class="product-detail">
+    <div class="product-image">
+        <img
+            src="@(string.IsNullOrEmpty(Model.ProductDetail.Image) ? "/images/product_placeholder.jpg" : $"{Model.ProductDetail.Imageurl}")"
+            alt="@Model.ProductDetail.Imageurl"/></div>
+    <div class="product-info">
+        <p><strong>Manufacturer:</strong> @Model.ProductDetail.Manufacturer.Name</p>
+        <p><strong>Price:</strong> @Model.ProductDetail.Price.ToString("C")</p>
+        @if (isAuthenticated)
+        {
+            @if (!Model.IsInWishList)
+            {
+                <form id="add-to-wishlist-form" asp-controller="Product" asp-action="AddToWishlist" method="post">
+                    <input type="hidden" id="WishlistItemId" name="ProductId" value="@Model.ProductDetail.Id"/>
+                    <button type="submit" id="add-to-wishlist-button" class="btn-secondary">Add to Wishlist</button>
+                </form>
+            }
+
+            <form id="add-to-cart-form" asp-controller="Product" asp-action="AddToCart" method="post">
+                <input type="hidden" id="ProductId" name="ProductId" value="@Model.ProductDetail.Id"/>
+                <input type="hidden" id="Quantity" name="Quantity" value="1"/>
+                <button type="submit" id="add-to-cart-button" class="btn-primary">Add to Cart</button>
+            </form>
+        }
+        @if (ViewData[Constants.Keys.ErrorMessage] != null)
+        {
+            <div id="error-message" style="color: red;">@ViewData[Constants.Keys.ErrorMessage]</div>
+        }
+    </div>
+</div>
+
+<h2>Reviews</h2>
+<div class="reviews">
+    @foreach (var review in Model.ProductDetail.Reviews)
+    {
+        <div class="review">
+            <div class="review-content">
+                <p><strong>@review.User.UserName </strong>
+                    @for (var i = 0; i < 5; i++)
+                    {
+                        <span class="star">@(i < review.Rating ? "★" : "☆")</span>
+                    }
+                    (@review.Rating/5)</p>
+                <p>@review.Body</p>
+            </div>
+            @if (review.UserId == userId || isAdmin)
+            {
+                <form asp-action="DeleteReview" method="post" class="delete-form">
+                    <input type="hidden" name="id" value="@review.Id"/>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            }
+        </div>
+    }
+</div>
+
+<h2>Write a Review</h2>
+<form asp-action="AddReview" method="post">
+    <input type="hidden" name="ProductId" value="@Model.ProductDetail.Id"/>
+    <div>
+        <label>Rating:</label>
+        <div class="rating">
+            @for (var i = 5; i >= 1; i--)
+            {
+                <input type="radio" id="star-@i" name="Rating" value="@i" required/>
+                <label for="star-@i" title="@i stars">★</label>
+            }
+        </div>
+    </div>
+    <div>
+        <label for="Body">Review:</label>
+        <textarea id="Body" name="Body" required></textarea>
+    </div>
+    <button type="submit">Submit Review</button>
+</form>

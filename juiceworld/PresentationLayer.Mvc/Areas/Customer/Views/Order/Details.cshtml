@@ -1,0 +1,89 @@
+@using PresentationLayer.Mvc
+@model PresentationLayer.Mvc.Models.OrderDetailViewModel
+
+@{
+    ViewData[Constants.Keys.Title] = "Order Details";
+}
+
+<h2>Order Details</h2>
+
+<div class="form-group">
+    <label>Order ID:</label>
+    <span>@Model.Id</span>
+</div>
+<div class="form-group">
+    <label>User ID:</label>
+    <span>@Model.UserId</span>
+</div>
+<div class="form-group">
+    <label>Payment Method:</label>
+    <span>@Model.PaymentMethodType</span>
+</div>
+<div class="form-group">
+    <label>Delivery Type:</label>
+    <span>@Model.DeliveryType</span>
+</div>
+<div class="form-group">
+    <label>Status:</label>
+    <span>@Model.Status</span>
+</div>
+<div class="form-group">
+    <label>City:</label>
+    <span>@Model.City</span>
+</div>
+<div class="form-group">
+    <label>Street:</label>
+    <span>@Model.Street</span>
+</div>
+<div class="form-group">
+    <label>House Number:</label>
+    <span>@Model.HouseNumber</span>
+</div>
+<div class="form-group">
+    <label>Zip Code:</label>
+    <span>@Model.ZipCode</span>
+</div>
+<div class="form-group">
+    <label>Country:</label>
+    <span>@Model.Country</span>
+</div>
+<div class="form-group">
+    <label>Coupon code:</label>
+    <span>@(Model.CouponCode?.Code ?? "")</span>
+</div>
+<div class="form-group">
+    <label>Discount:</label>
+    <span>@(Model.CouponCode?.GiftCard?.Discount.ToString() ?? "")</span>
+</div>
+<div class="form-group">
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.OrderProducts)
+        {
+            <tr>
+                <td>@item.Product?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.Price.ToString("C")</td>
+                <td>@((item.Price * item.Quantity).ToString("C"))</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <strong>Grand Total: </strong>
+        <span>@Model.OrderProducts.Sum(p => p.Price * p.Quantity).ToString("C")</span>
+    </div>
+</div>
+
+<div class="form-group mt-3 d-flex justify-content-end">
+    <a href="@Url.Action("Index", "Order")" class="btn btn-secondary me-2">Back to Orders</a>
+</div>

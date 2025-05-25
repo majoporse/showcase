@@ -1,0 +1,52 @@
+﻿{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:23053",
+      "sslPort": 44379
+    }
+  },
+  "profiles": {
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5035",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=juiceworld;Username=postgres;Password=postgres",
+        "LOGGING_DB_DATABASE_NAME": "juiceworld",
+        "LOGGING_DB_COLLECTION_NAME": "logs",
+        "LOGGING_DB_CONNECTION_STRING": "mongodb://root:root@localhost:27017",
+        "JWT_SECRET": "bAafd@A7d9#@F4*V!LHZs#ebKQrkE6pad2f3kj34c3dXy@",
+        "MVC_PORT": "7137",
+        "BLOB_STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
+      }
+    },
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7137;http://localhost:5035",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DB_CONNECTION_STRING": "Host=localhost;Port=5432;Database=juiceworld;Username=postgres;Password=postgres",
+        "LOGGING_DB_DATABASE_NAME": "juiceworld",
+        "LOGGING_DB_COLLECTION_NAME": "logs",
+        "LOGGING_DB_CONNECTION_STRING": "mongodb://root:root@localhost:27017",
+        "JWT_SECRET": "bAafd@A7d9#@F4*V!LHZs#ebKQrkE6pad2f3kj34c3dXy@",
+        "MVC_PORT": "7137",
+        "BLOB_STORAGE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
+      }
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

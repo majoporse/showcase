@@ -1,0 +1,53 @@
+﻿@using powerPalsDb.Models
+@inject NavigationManager NavigationManager
+@using BlazorServerAuthenticationAndAuthorization.models
+
+<MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary" Class="d-flex align-items-center">
+
+	<MudTabPanel Text="FOLLOWERS">
+		<ItemList Items="@(Followers.Select(user => new Preview(){ Name = user.Name, ImageUrl = user.ProfilePicUrl, Id = user.Id}).ToList())"
+				  onClick="@((id) => NavigationManager.NavigateTo($"/user/{id}", true))" />
+	</MudTabPanel>
+
+	<MudTabPanel Text="FOLLOWING">
+		<ItemList Items="@(Following.Select(user => new Preview(){ Name = user.Name, ImageUrl = user.ProfilePicUrl, Id = user.Id}).ToList())"
+				  onClick="@((id) => NavigationManager.NavigateTo($"/user/{id}", true))" />
+	</MudTabPanel>
+
+	<MudTabPanel Text="POSTS">
+		<MudChipSet @bind-SelectedChips="selected" MultiSelection="true" 
+				@onclick="(() => update(selected?.Select(m =>m.Text).ToList() ?? new List<string>()))" 
+				Class="d-flex align-content-center justify-content-center mt-5">
+			@foreach (var tag in tags)
+			{
+				<MudChip Default="true" Color="Color.Primary" Variant="Variant.Text" SelectedColor="Color.Secondary" Text="@tag"></MudChip>
+			}
+		</MudChipSet>
+		<PostList Posts="@Posts" refresh="refresh" />
+	</MudTabPanel>
+
+	<MudTabPanel Text="GYMS">
+		<ItemList Items="@(Gyms.Select(gym => new Preview(){ Name = gym.Name, ImageUrl = gym.ImageUrl, Id = gym.Id}).ToList())"
+				  onClick="@((id) => NavigationManager.NavigateTo($"/gym/{id}", true))" />
+	</MudTabPanel>
+</MudTabs>
+
+@code {
+	private string[] tags = new string[] { "Powerlifting", "Bodybuilding", "Weightlifting", "Strongman" };
+	private MudChip[]? selected;
+
+	[Parameter]
+	public List<User> Followers { get; set; } = new();
+	[Parameter]
+	public List<User> Following { get; set; } = new();
+	[Parameter]
+	public List<Post> Posts { get; set; } = new();
+	[Parameter]
+	public List<Gym> Gyms { get; set; } = new();
+	[Parameter]
+	public EventCallback refresh { get; set; }
+	[Parameter]
+	public EventCallback refreshPosts { get; set; }
+	[Parameter]
+	public Action<List<string>> update { get; set; }
+}

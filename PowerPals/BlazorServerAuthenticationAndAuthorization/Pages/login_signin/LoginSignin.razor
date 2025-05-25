@@ -1,0 +1,15 @@
+﻿@page "/"
+@inject NavigationManager navigationManager
+@layout EmptyLayout
+
+<MudText Typo="Typo.h1">POWER PALS</MudText>
+
+<MudButtonGroup Color="Color.Primary"  Variant="Variant.Filled" OverrideStyles="false" >
+
+    <MudButton Color="Color.Primary" Style="font-size: 3rem; font-weight: 200; width: 250px" Variant="Variant.Filled"
+    OnClick="@(() => navigationManager.NavigateTo("/log-in"))">LOG-IN</MudButton>
+
+    <MudButton Color="Color.Warning" Style="font-size: 3rem; font-weight: 200; width: 250px" Variant="Variant.Filled"
+    OnClick="@(() => navigationManager.NavigateTo("/sign-in"))">SIGN-IN</MudButton>
+
+</MudButtonGroup>

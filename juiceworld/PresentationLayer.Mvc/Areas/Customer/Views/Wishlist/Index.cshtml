@@ -1,0 +1,47 @@
+@using PresentationLayer.Mvc
+@model IEnumerable<PresentationLayer.Mvc.Areas.Customer.Models.WishlistItemDetailViewModel>
+
+@{
+    ViewData[Constants.Keys.Title] = "Wishlist";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Your wishlist is empty. <a href="@Url.Action("Index", "Product", new { area = Constants.Areas.Customer })">Browse
+                products</a>
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var wishListItem in Model)
+            {
+                <tr>
+                    <td>@wishListItem.Product.Name</td>
+                    <td>
+                        <form asp-controller="Wishlist" asp-action="Delete" method="POST" style="display:inline;">
+                            <input type="hidden" name="id" value="@wishListItem.Id"/>
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                        <form asp-controller="Wishlist" asp-action="AddToCart" method="POST" style="display:inline;">
+                            <input type="hidden" name="ProductId" value="@wishListItem.Product.Id"/>
+                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+</div>

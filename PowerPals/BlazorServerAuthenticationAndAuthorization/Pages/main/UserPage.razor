@@ -1,0 +1,137 @@
+﻿@page "/user/{powerPalId}"
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Commons
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.PostService PostService
+@inject PowerPalsServices.UserService UserService
+@inject PowerPalsServices.GymService GymService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<div class="d-flex flex-row justify-content-around align-content-around w-75 mb-5" style="max-width: 750px">
+	
+	<MudImage Src=@powerPal.ProfilePicUrl Alt="Profile picture"
+			  Class="rounded-circle mr-3 align-self-center" Style="width: 150px; height: 150px" />
+
+	<div class="d-flex flex-column">
+		<div class="d-flex flex-row align-items-center">
+			<MudText Typo="Typo.h4" Class="mb-3">@powerPal.Name</MudText>
+			@if (user.Id != powerPal.Id)
+			{
+				
+				@if (following)
+				{
+					<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Primary" OnClick="UnFollow">Unfollow</MudButton>
+				}
+				else
+				{
+					<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Primary" OnClick="Follow" >Follow</MudButton>
+				}
+			}
+			else
+			{
+				<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Secondary" Href="/user-edit">Edit user</MudButton>
+			}
+		</div>
+
+		<MudTextField T="string" Text="@powerPal.Bio" Label="Bio" Lines="5"
+					  Style="width: 30vw; max-width: 500px" Variant="Variant.Outlined" ReadOnly="true" />
+	</div>
+</div>
+
+<MudDivider Class="border-2 mb-3 w-75" Style=@($"border-color: {Colors.DeepPurple.Default}") />
+
+<UserFooter 
+	Followers="Followers" 
+	Following="Following" 
+	Posts="Posts" 
+	Gyms="Gyms" 
+	refresh="refresh" 
+	refreshPosts="GetPosts" 
+	update="UpdatePosts" />
+
+@code {
+
+	[CascadingParameter]
+	protected Task<AuthenticationState>? authenticationState { get; set; }
+
+	[Parameter]
+	public string? powerPalId { get; set; }
+
+	private List<string> tags = new List<string>{ "Powerlifting", "Bodybuilding", "Weightlifting", "Strongman" };
+
+	private User powerPal = new User();
+
+	private User user = new User();
+
+	private List<User> Followers { get; set; } = new();
+	private List<User> Following { get; set; } = new();
+	private List<Post> Posts { get; set; } = new();
+	private List<Gym> Gyms { get; set; } = new();
+
+	private bool following = false;
+
+	private async void UpdatePosts(List<string> newtags)
+	{
+		tags = newtags;
+		await refresh();
+	}
+
+	private async Task refresh()
+	{
+		await GetFollowers();
+		await GetFollowing();
+		await GetGyms();
+		await GetPosts();
+		StateHasChanged();
+	}
+
+	private async Task Follow()
+	{
+		await UserService.AddFollowAsync(user.Id, powerPal.Id);
+		await GetFollowers();
+		following = true;
+		StateHasChanged();
+	}
+
+	private async Task UnFollow()
+	{
+		await UserService.RemoveFollowAsync(user.Id, powerPal.Id);
+		await GetFollowers();
+		following = false;
+		StateHasChanged();
+	}
+
+
+	private async Task GetFollowers() => Followers = await UserService.GetFollowersAsync(powerPal.Id);
+	private async Task GetFollowing() => Following = await UserService.GetFollowingAsync(powerPal.Id);
+	private async Task GetGyms() => Gyms = await GymService.GetGymsByUserAsync(powerPal.Id);
+	private async Task GetPosts() => Posts = await PostService.GetPostsByUserWithTagsAsync(powerPal.Id, tags);
+
+	protected override async Task OnInitializedAsync()
+	{
+		if (powerPalId == null || !int.TryParse(powerPalId, out var powerPalIdNum))
+		{
+			NavigationManager.NavigateTo("/home");
+			return;
+		}
+		var state = await authenticationState!;
+
+		string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+		user = (await UserService.GetUserByIdAsync(int.Parse(userId)))!;
+
+		var Pal = await UserService.GetUserByIdAsync(int.Parse(powerPalId));
+		if (Pal== null)
+		{
+			Snackbar.Add("User not found", Severity.Error);
+			NavigationManager.NavigateTo("/home");
+			return;
+		}
+
+		powerPal = Pal;
+		await refresh();
+		following = Followers.Any(f => f.Id == user.Id);
+	}
+
+}

@@ -1,0 +1,19 @@
+﻿@namespace BlazorServerAuthenticationAndAuthorization.models
+
+<MudButton @onclick="@(() => OnClick.InvokeAsync(preview.Id))"
+    Class="pa-3 rounded-pill ma-2 shadow-lg" 
+    Variant="Variant.Outlined"
+    Style="@($"border-color: {Colors.DeepPurple.Default}; width:400px; height: 75px; border-radius: 1.5rem")">
+    <div Class="user-info d-flex align-items-center flex-row w-100">
+        <MudImage Src=@preview.ImageUrl Alt="Profile picture" Class="rounded-circle mr-3" Style="width: 50px; height: 50px"/>
+        <MudText Typo="Typo.h4" Align="Align.Center">@preview.Name</MudText>
+    </div>
+</MudButton>
+
+@code {
+    [Parameter]
+    public Preview preview { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnClick { get; set; }
+}

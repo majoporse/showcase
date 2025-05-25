@@ -1,0 +1,147 @@
+﻿@page "/gym/{gymId}"
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Commons
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.GymService GymService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<div class="d-flex flex-row justify-content-around align-content-around w-75 mb-5" style="max-width: 750px">
+
+	<MudImage Src=@gym.ImageUrl Alt="Profile picture"
+			  Class="rounded-circle mr-3 align-self-center" Style="width: 150px; height: 150px" />
+
+	<div class="d-flex flex-column">
+		<div class="d-flex flex-row align-items-center">
+
+			<MudText Typo="Typo.h4" Class="mb-3">@gym.Name</MudText>
+			<MudButtonGroup OverrideStyles="false" Class="ml-auto">
+
+			@if (owner)
+			{
+				<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Secondary"
+				OnClick="@(() => NavigationManager.NavigateTo($"/edit/gym/{gym.Id}"))"> EDIT</MudButton>
+			}
+			@if (!joined)
+			{
+				<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Primary"
+				OnClick="Follow">JOIN</MudButton>
+			}
+			else
+			{
+				<MudButton Variant="Variant.Filled" Class="rounded-5 ml-auto" Color="Color.Primary"
+				OnClick="UnFollow">LEAVE</MudButton>
+			}
+			</MudButtonGroup>
+
+		</div>
+		<MudTextField T="string" Text="@gym.Description" Label="Bio" Lines="5"
+					  Style="width: 30vw; max-width: 500px" Variant="Variant.Outlined" ReadOnly="true" />
+
+	</div>
+</div>
+
+<MudDivider Class="border-2 mb-3 w-75" Style=@($"border-color: {Colors.DeepPurple.Default}") />
+
+<MudTabs Elevation="4" Rounded="true" Centered="true" Color="@Color.Primary" Class="d-flex align-items-center">
+	<MudTabPanel Text="REVIEWS" >
+		<div class="d-flex flex-column align-items-center justify-content-center">
+			<CreateReview gym="gym" refresh="refreshReviews"/>
+			<ReviewList Items="@Reviews" refresh="refreshReviews" />
+		</div>
+	</MudTabPanel>
+	<MudTabPanel Text="POWER PALS" Class="flex-grow-0">
+		<ItemList Items="@(Users.Select(user => new Preview(){ Name = user.Name, ImageUrl = user.ProfilePicUrl, Id = user.Id}).ToList())"
+				onClick="@((id) => NavigationManager.NavigateTo($"/user/{id}"))"/>
+	</MudTabPanel>
+</MudTabs>
+
+@code {
+	[CascadingParameter]
+	protected Task<AuthenticationState>? authenticationState { get; set; }
+
+	[Parameter]
+	public string? gymId { get; set; }
+
+	private bool owner = false;
+
+	private Gym gym = new();
+
+	private List<User> Users { get; set; } = new();
+
+	private List<Review> Reviews { get; set; } = new();
+
+	private bool joined = false;
+
+	private int userId = -1;
+
+	private async Task GetGymGoers() => Users = await GymService.GetUsersByGymAsync(gym.Id);
+
+	private async Task GetReviews() => Reviews = await GymService.GetReviewsAsync(gym.Id);
+
+	private async Task refreshReviews()
+	{
+		Reviews = new();
+		StateHasChanged();
+		await GetReviews();
+		Reviews.Sort((a, b) => b.CreatedAt.CompareTo(a.CreatedAt));
+		StateHasChanged();
+	}
+
+	private async Task Follow()
+	{
+		await GymService.AddGymGoerAsync(userId, gym.Id );
+		joined = true;
+		await GetGymGoers();
+		StateHasChanged();
+	}
+
+	private async Task UnFollow()
+	{
+		await GymService.RemoveGymGoerAsync(userId, gym.Id);
+		joined = false;
+		await GetGymGoers();
+		StateHasChanged();
+	}
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		//check if the url is correct
+		if (gymId == null || !int.TryParse(gymId, out var gymIdNum))
+		{
+			Snackbar.Add("Wrong gym url", Severity.Error);
+			NavigationManager.NavigateTo("/home");
+			return;
+		}
+		var state = await authenticationState!;
+
+		//check if the gym exists
+		var _gym = await GymService.GetGymByIdAsync(gymIdNum);
+		if (_gym == null)
+		{
+			Snackbar.Add("Gym does not exist", Severity.Error);
+			NavigationManager.NavigateTo("/home");
+			return;
+		}
+		gym = _gym;
+
+		//check ownership
+		string _userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+		userId = int.Parse(_userId);
+		var userGyms = await GymService.GetGymsByOwner(userId);
+
+		if (userGyms.Find(g => g.Id == gymIdNum) != null)
+		{
+			owner = true;
+		}
+
+		//check if user is following
+		var GymGoers = await GymService.GetUsersByGymAsync(gym.Id);
+		var pos = GymGoers.Find(u => u.Id == userId);
+		joined = pos != null;
+		await GetGymGoers();
+		await GetReviews();
+	}
+}

@@ -1,0 +1,109 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.PostService PostService
+@inject NavigationManager navigationManager
+
+<MudCard Elevation=7 Style="@($"border-color: {Colors.DeepPurple.Default}; width: 500px; max-height: 700px; border-radius: 1.5rem")" Class="border-2">
+    <header class="flex-row d-flex align-items-center pa-3" >
+        <MudButton Class="rounded-circle mr-3" >
+            <MudImage Src="@user.ProfilePicUrl" Alt="Profile picture" Style="width: 50px; height: 50px" Class="rounded-circle"
+                @onclick="@(() => navigationManager.NavigateTo($"/user/{post.UserId}"))"/>
+        </MudButton>
+
+        <MudText Typo="Typo.h6" Class="align-content-center">@user.Name</MudText>
+
+        @if (owner)
+		{
+            @if (editMode)
+            {
+                <MudButtonGroup Class="ml-auto">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Variant="Variant.Filled"
+                                   Color="Color.Secondary" @onclick="DeletePost"></MudIconButton> 
+
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Variant="Variant.Filled" 
+                                    Color="Color.Secondary" @onclick="EditPost"></MudIconButton>
+                </MudButtonGroup>
+            }
+            else
+            {
+            <MudIconButton Class="ml-auto rounded-3" Icon="@Icons.Material.Filled.Edit" Variant="Variant.Text"
+                           Size="Size.Medium"  OnClick="OpenEdit"></MudIconButton>
+            }
+        }
+    </header>
+    <MudDivider DividerType="DividerType.Middle" Class="border-secondary" />
+
+    <MudPaper Class="ma-5" Elevation=0>
+        @if (editMode)
+        {
+            <MudTextField Variant="Variant.Outlined" Label="Edit Post" @bind-Value="post.Content" Lines="3" />
+        }
+        else
+        {
+            <MudText Typo="Typo.body1" Style=" word-wrap: break-word; ">@post.Content</MudText>
+        }
+    </MudPaper>
+    <MudCardActions class="pa-4">
+        <MudChipSet @bind-SelectedChips="selected" ReadOnly="true">
+            @foreach (var tag in post.Tags)
+            {
+                <MudChip Variant="Variant.Filled" Size="Size.Small" Color="Color.Secondary" Text="@tag.Name" />
+            }
+        </MudChipSet>
+        @if (post.EditedAt != null)
+        {
+            <MudText Class="ml-auto" Typo="Typo.body2">Edited: @post.EditedAt?.ToShortTimeString()</MudText>
+        }
+        else
+        {
+            <MudText Class="ml-auto" Typo="Typo.body2">Posted: @post.Date.ToShortTimeString()</MudText>
+        }
+	</MudCardActions>
+</MudCard>
+
+@code {
+    [Parameter]
+    public Post post { get; set; } = new();
+
+    [Parameter]
+    public EventCallback refresh { get; set; }
+
+    [CascadingParameter]
+    protected Task<AuthenticationState>? authenticationState { get; set; }
+    
+    private MudChip[]? selected;
+    
+    private bool owner = false;
+    private bool editMode = false;
+
+    private User user = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await authenticationState!;
+
+        // Assuming the user's ID is stored as a claim with the type ClaimTypes.NameIdentifier
+        string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+        user = post.User;
+        if (int.Parse(userId) == post.UserId)
+        {
+            owner = true;
+        }
+    }
+
+    private void OpenEdit() => editMode = true;
+
+    private async void EditPost()
+    {
+        editMode = false;
+        post.EditedAt = DateTime.Now;
+        await PostService.UpdatePostAsync(post);
+    }
+
+    private async void DeletePost()
+    {
+		await PostService.DeletePostAsync(post.Id);
+        await refresh.InvokeAsync();
+    }
+}

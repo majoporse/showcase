@@ -1,0 +1,97 @@
+﻿@inherits LayoutComponentBase
+@using BlazorServerAuthenticationAndAuthorization.models
+@inject NavigationManager NavigationManager
+@using BlazorServerAuthenticationAndAuthorization.Authentication
+@using System.Security.Claims
+@inject AuthenticationStateProvider authStateProvider
+
+<MudThemeProvider />
+<MudSnackbarProvider />
+<AuthorizeView>
+    <Authorized>
+    <MudLayout>
+        <MudAppBar Dense="@dense">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+            <MudSpacer />
+            <MudText Typo="Typo.h5">
+                @if (NavigationManager.Uri.Contains("/search/user"))
+                {
+                    <text>FIND A POWER PAL</text>
+                }
+                else if (NavigationManager.Uri.Contains("/search/gym"))
+                {
+                    <text>FIND A GYM</text>
+                }
+                else if (NavigationManager.Uri.Contains($"/user/{userId}"))
+                {
+                    <text>PROFILE</text>
+                }
+                else if (NavigationManager.Uri.Contains("/user-edit"))
+				{
+					<text>USER EDIT</text>
+				}
+                else
+                {
+                    <text>POWER PALS</text>
+                }
+            </MudText>
+            <MudSpacer />
+            <MudIconButton Icon="@Icons.Material.Rounded.Logout" Color="Color.Inherit" OnClick="@Logout" Target="_blank" />
+        </MudAppBar>
+        <MudDrawer @bind-Open="@open" DisableOverlay="true" ClipMode="clipMode" Elevation="1" Variant="@DrawerVariant.Temporary">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h6">My App</MudText>
+            </MudDrawerHeader>
+            <MudNavMenu>
+                <MudNavLink Href="/home" Icon="@Icons.Material.Filled.Dashboard">Main Page</MudNavLink>
+                <MudNavLink Href="/search/gym" Icon="@Icons.Material.Outlined.Search">Search Gym</MudNavLink>
+                <MudNavLink Href="@($"/create/gym")" Icon="@Icons.Material.Outlined.Person">Create gym</MudNavLink>
+                <MudNavLink Href="/search/user" Icon="@Icons.Material.Outlined.Search">Search Users</MudNavLink>
+                <MudNavLink Href="@($"/user/{userId}")" Icon="@Icons.Material.Outlined.Person">User</MudNavLink>
+            </MudNavMenu>
+        </MudDrawer>
+        <MudMainContent Class="pt-16 px-16">
+            <MudContainer Class="mt-6 d-flex flex-column align-items-center justify-content-center"
+                          style="min-width: 500px; max-width: 1500px">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </MudLayout>
+    </Authorized>
+</AuthorizeView>
+
+
+@code {
+    [CascadingParameter]
+    protected Task<AuthenticationState> authenticationState { get; set; }
+
+    int? userId = null;
+
+    bool open = false;
+    bool dense = false;
+    DrawerClipMode clipMode = DrawerClipMode.Never;
+
+    void ToggleDrawer()
+    {
+        open = !open;
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var state = await authenticationState;
+        if (!state.User.Identity.IsAuthenticated)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        userId = int.Parse(state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value);
+    }
+
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthenticationStateProvider) authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(null);
+        NavigationManager.NavigateTo("/");
+    }
+}

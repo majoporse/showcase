@@ -1,0 +1,21 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using powerPalsDb.Models
+
+<div>
+
+	@foreach (var post in Posts)
+	{
+		<div class="ma-5">
+			<PostWidget post="@post" refresh="refresh" />
+		</div>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public List<Post> Posts { get; set; } = new();
+
+	[Parameter]
+	public EventCallback refresh { get; set; }
+
+}

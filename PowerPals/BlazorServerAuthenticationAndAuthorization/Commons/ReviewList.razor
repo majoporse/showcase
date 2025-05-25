@@ -1,0 +1,19 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using powerPalsDb.Models
+
+<MudList>
+	@foreach (var review in Items)
+	{
+		<div class="ma-5">
+			<ReviewWidget review="review" refresh="refresh" />
+		</div>
+	}
+</MudList>
+
+@code {
+	[Parameter]
+	public List<Review> Items { get; set; } = new();
+
+	[Parameter]
+	public EventCallback refresh { get; set; }
+}

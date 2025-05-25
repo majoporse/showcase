@@ -1,0 +1,38 @@
+@using PresentationLayer.Mvc
+@model IEnumerable<PresentationLayer.Mvc.Areas.Admin.Models.TagViewModel>
+
+@{
+    ViewData[Constants.Keys.Title] = "Tags";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+
+    <a href="@Url.Action("Create", "Tag")" class="btn btn-success mb-3">Create New Tag</a>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Tag ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var tag in Model)
+        {
+            <tr style="color:@tag.ColorHex;">
+                <td>@tag.Id</td>
+                <td>@tag.Name</td>
+                <td>
+                    <a href="@Url.Action("Edit", "Tag", new { id = tag.Id })" class="btn btn-info">Edit</a>
+                    <form method="post" asp-action="Delete" asp-controller="Tag" asp-route-id="@tag.Id" class="d-inline"
+                          onsubmit="return confirm(`Are you sure you want to delete tag: @tag.Name`);">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

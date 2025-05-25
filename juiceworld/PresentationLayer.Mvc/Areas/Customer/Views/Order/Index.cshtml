@@ -1,0 +1,47 @@
+@using BusinessLayer.DTOs
+@using PresentationLayer.Mvc
+@model Infrastructure.QueryObjects.FilteredResult<PresentationLayer.Mvc.Areas.Customer.Models.OrderViewModel>
+
+@{
+    ViewData[Constants.Keys.Title] = "Orders";
+    var startPage = Math.Max(1, Model.PageIndex - 5);
+    var endPage = Math.Min(Model.TotalPages, Model.PageIndex + 5);
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var product in Model.Entities)
+        {
+            <tr>
+                <td>@product.Id</td>
+                <td>@product.Status</td>
+                <td>
+                    <a href="@Url.Action("Details", "Order", new { id = product.Id })" class="btn btn-info">Details</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            @for (var i = startPage; i <= endPage; i++)
+            {
+                <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                    <a class="page-link" href="@Url.Action("Index", new PaginationDto { PageIndex = i })">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
+

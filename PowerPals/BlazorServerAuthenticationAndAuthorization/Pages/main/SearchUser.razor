@@ -1,0 +1,32 @@
+﻿@page "/search/user"
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Commons
+@using powerPalsDb.Models
+@inject PowerPalsServices.UserService UserService
+@inject NavigationManager NavigationManager
+
+<div class="d-flex flex-column align-items-center justify-content-center w-50">
+	<MudTextField @bind-Value="@searchparam" Immediate="true" Class="w-75" Variant="Variant.Outlined" Adornment="Adornment.End"
+				  AdornmentIcon="@Icons.Material.Filled.Search" TextChanged="@(async () => await SearchUsers())" />
+	<ItemList Items="@(users.Select(item => new Preview(){Name = item.Name, ImageUrl=item.ProfilePicUrl, Id=item.Id}).ToList())"
+			  onClick="@( (id) => NavigationManager.NavigateTo($"/user/{id}"))" />
+</div>
+
+@code {
+	[Parameter]
+	public string searchparam { get; set; } = "";
+
+	private List<User> users = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		await SearchUsers();
+	}
+
+	private async Task SearchUsers()
+	{
+		users = searchparam != "" ? await UserService.GetUsersByNameAsync(searchparam) : await UserService.GetUsersAsync();
+
+		StateHasChanged();
+	}
+}

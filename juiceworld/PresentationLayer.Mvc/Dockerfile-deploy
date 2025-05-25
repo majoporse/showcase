@@ -1,0 +1,31 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY PresentationLayer.Mvc/*.csproj ./PresentationLayer.Mvc/
+RUN dotnet restore ./PresentationLayer.Mvc
+
+COPY . .
+
+WORKDIR /src/PresentationLayer.Mvc
+RUN dotnet publish -c Release -o /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+WORKDIR /app
+COPY --from=build /app/publish .
+
+LABEL maintainer="bilanin@mail.muni.cz"
+
+RUN groupadd -g 999 juiceworld && \
+    useradd -r -u 999 -g juiceworld -m -s /bin/bash juiceworld && \
+    apt-get update && \
+    apt-get install -y sudo && \
+    echo "juiceworld ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
+    chown -R juiceworld:juiceworld /app
+
+ENV LANG=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+
+ENV ASPNETCORE_ENVIRONMENT=Production
+USER juiceworld
+ENTRYPOINT ["dotnet", "PresentationLayer.Mvc.dll"]

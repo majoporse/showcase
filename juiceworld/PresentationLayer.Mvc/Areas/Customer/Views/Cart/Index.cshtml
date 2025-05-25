@@ -1,0 +1,67 @@
+@using PresentationLayer.Mvc
+@model IEnumerable<BusinessLayer.DTOs.CartItemDetailDto>
+
+@{
+    ViewData[Constants.Keys.Title] = "Cart";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+
+    @if (ViewData[Constants.Keys.ErrorMessage] != null)
+    {
+        <div class="alert alert-danger">
+            @ViewData[Constants.Keys.ErrorMessage]
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            Your cart is empty. <a href="@Url.Action("Index", "Product", new { area = Constants.Areas.Customer })">Browse
+                products</a>
+        </div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var cartItem in Model)
+            {
+                <tr>
+                    <td>@cartItem.Product.Name</td>
+                    <td>
+                        <span id="quantity-@cartItem.Id">@cartItem.Quantity</span>
+                    </td>
+                    <td>
+                        <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline;">
+                            <input type="hidden" name="ProductId" value="@cartItem.Product.Id"/>
+                            <input type="hidden" name="Quantity" value="@(cartItem.Quantity - 1)"/>
+                            <button type="submit" class="btn btn-primary btn-sm">-</button>
+                        </form>
+                        <form asp-controller="Cart" asp-action="AddToCart" method="POST" style="display:inline;">
+                            <input type="hidden" name="ProductId" value="@cartItem.Product.Id"/>
+                            <input type="hidden" name="Quantity" value="@(cartItem.Quantity + 1)"/>
+                            <button type="submit" class="btn btn-primary btn-sm">+</button>
+                        </form>
+                        <form asp-controller="Cart" asp-action="DeleteCartItem" method="POST" style="display:inline;">
+                            <input type="hidden" name="id" value="@cartItem.Id"/>
+                            <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <div class="text-right">
+            <a href="@Url.Action("Create", "Order", new { area = Constants.Areas.Customer })" class="btn btn-success">Checkout</a>
+        </div>
+    }
+</div>

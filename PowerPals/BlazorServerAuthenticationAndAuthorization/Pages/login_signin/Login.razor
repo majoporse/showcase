@@ -1,0 +1,45 @@
+﻿@page "/log-in"
+@layout EmptyLayout
+@inject NavigationManager navigationManager
+@using System.ComponentModel.DataAnnotations
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Authentication
+@inject PowerPalsServices.UserService userAccountService
+@inject AuthenticationStateProvider authStateProvider
+@inject IJSRuntime js
+
+<MudText Typo="Typo.h1">LOG-IN</MudText>
+<MudDivider Class="flex-grow-0 border-2 w-50" Style="@($"height: 1px; border-color: {Colors.DeepPurple.Default}")" />
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit" class="w-50 d-flex justify-content-center flex-column align-items-center ">
+    <DataAnnotationsValidator />
+    <MudCardContent Class="w-50 ma-4">
+        <MudTextField Label="Username" Variant="Variant.Outlined"
+                        @bind-Value="model.Username" For="@(() => model.Username)" />
+        <MudTextField Label="Password" Class="mt-3" Variant="Variant.Outlined"
+                        @bind-Value="model.Password" For="@(() => model.Password)" InputType="InputType.Password" />
+    </MudCardContent>
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">LOGIN</MudButton>
+</EditForm>
+
+@code {
+    LoginForm model = new();
+
+    private async void OnValidSubmit(EditContext context)
+    {
+        var userAccount = await userAccountService.GetUserByNameAsync(model.Username);
+        if (userAccount == null || userAccount.Password != model.Password)
+        {
+            await js.InvokeVoidAsync("alert", "Invalid User Name or Password");
+            return;
+        }
+
+        var customAuthStateProvider = (CustomAuthenticationStateProvider) authStateProvider;
+        await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+        {
+            UserName = userAccount.Name,
+            Id = userAccount.Id
+        });
+        navigationManager.NavigateTo("/home", true);
+    }
+}

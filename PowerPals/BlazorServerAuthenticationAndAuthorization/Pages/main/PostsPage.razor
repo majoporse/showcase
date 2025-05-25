@@ -1,0 +1,53 @@
+﻿@page "/home"
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Commons
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.PostService PostService
+@inject PowerPalsServices.UserService UserService
+
+<CreatePost user="@user" OnClick="UpdatePosts"/>
+<MudPaper Elevation="0">
+	<MudChipSet @bind-SelectedChips="selected" MultiSelection="true" @onclick="UpdatePosts"
+	Class="d-flex align-content-center justify-content-center" >
+		@foreach (var tag in tags)
+		{
+			<MudChip Default="true" Color="Color.Primary" Variant="Variant.Text" SelectedColor="Color.Secondary" Text="@tag"></MudChip>
+		}
+	</MudChipSet>
+	<PostList Posts="@posts" refresh="UpdatePosts"/>
+</MudPaper>
+
+<MudScrollToTop>
+	<MudFab Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.ArrowCircleUp" />
+</MudScrollToTop>
+
+@code {
+	private string[] tags = new string[] { "Powerlifting", "Bodybuilding", "Weightlifting", "Strongman" };
+	private MudChip[]? selected;
+
+	private User user = new();
+	private List<Post> posts = new();
+
+	[CascadingParameter]
+	protected Task<AuthenticationState>? authenticationState { get; set; }
+
+	private async Task UpdatePosts()
+	{
+		posts = new();
+		StateHasChanged();
+		posts = await PostService.GetPostsOfFollowingWithTags(user.Id, selected?.Select(c => c.Text).ToList() ?? new List<string>());
+		posts.AddRange(await PostService.GetPostsByUserWithTagsAsync(user.Id, selected?.Select(c => c.Text).ToList() ?? new List<string>()));
+		posts.Sort((a, b) => b.Date.CompareTo(a.Date));
+		StateHasChanged();
+	}
+
+	protected override async Task OnInitializedAsync()
+	{
+		base.OnInitialized();
+		var state = await authenticationState!;
+		string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+		user = (await UserService.GetUserByIdAsync(int.Parse(userId)))!;
+		await UpdatePosts();
+	}
+}

@@ -1,0 +1,67 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+@using System.ComponentModel.DataAnnotations
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.PostService postService
+
+<MudPaper Style="width: 500px; max-height: 700px; border-radius: 1.5rem" Class="border-2 border-secondary mb-5">
+
+    <header class="flex-row d-flex align-content-center pa-3">
+        <MudButton Class="rounded-circle mr-3" Icon="@user.ProfilePicUrl">
+            <MudImage Src="@user.ProfilePicUrl" Alt="Profile picture" Style="width: 50px; height: 50px" Class="rounded-circle" />
+        </MudButton>
+        <MudText Typo="Typo.h6" Class="align-content-center">@user.Name</MudText>
+    </header>
+
+    <EditForm Model="@model" OnValidSubmit="Post" FormName="postform">
+        <DataAnnotationsValidator />
+        <MudTextField @bind-Value="model.text" Label="Create a post!" Variant="Variant.Outlined" HelperTextOnFocus="true" Class="mx-3"
+                      Immediate="true" Placeholder="type here" Lines="3" HelperText="@("Max 69 characters. Current: " + model.text.Length)" For="@(() => model.text)" />
+        
+        <MudCardActions class="d-flex justify-content-between w-100 px-4 pb-4 pt-0">
+            <MudChipSet @bind-SelectedChips="selected" MultiSelection="true">
+                @foreach (string tag in tags)
+                {
+                    <MudChip Default="true"  Size="Size.Small" Color="Color.Primary" Variant="Variant.Text" SelectedColor="Color.Secondary" Text="@tag" />
+                }
+            </MudChipSet>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">POST</MudButton>
+        </MudCardActions>
+    </EditForm>
+</MudPaper>
+
+
+@code {
+    [Parameter]
+    public EventCallback OnClick { get; set; }
+
+    [Parameter]
+    public User user { get; set; } = new();
+
+    [CascadingParameter]
+    protected Task<AuthenticationState>? authenticationState { get; set; }
+
+    private string[] tags = new string[] { "Powerlifting", "Bodybuilding", "Weightlifting", "Strongman" };
+    private PostDataForm model = new();
+    private MudChip[]? selected;
+
+    public class PostDataForm
+    {
+        [Required]
+        [StringLength(69, ErrorMessage = "Name length can't be more than 69.")]
+        public string text { get; set; } = "";
+    }
+
+    private async void Post(EditContext ctx)
+    {
+        var state = await authenticationState!;
+        string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+
+        await postService.CreatePostWithTags(
+            new Post { UserId = int.Parse(userId), Content = model.text }, 
+            selected?.Select(chip => chip.Text).ToList() ?? new List<string>());
+
+        model.text = "";
+        await OnClick.InvokeAsync();
+    }
+}

@@ -1,0 +1,70 @@
+/* wwwroot/css/product-details.css */
+
+.product-detail {
+    display: flex;
+    gap: 20px;
+}
+
+.product-image img {
+    max-width: 300px;
+    height: auto;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.reviews {
+    margin-top: 20px;
+}
+
+.review {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.review .star {
+    color: gold;
+    font-size: 1.2em;
+}
+
+form {
+    margin-top: 20px;
+}
+
+form div {
+    margin-bottom: 10px;
+}
+
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+}
+
+.rating input {
+    display: none;
+}
+
+.rating label {
+    font-size: 2em;
+    color: #ccc;
+    cursor: pointer;
+}
+
+.rating input:checked ~ label {
+    color: gold;
+}
+
+.rating label:hover,
+.rating label:hover ~ label {
+    color: gold;
+}
+
+.delete-form {
+    display: flex;
+    align-items: center;
+}

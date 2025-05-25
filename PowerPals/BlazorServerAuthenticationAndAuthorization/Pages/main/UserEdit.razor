@@ -1,0 +1,79 @@
+﻿@page "/user-edit"
+@using BlazorServerAuthenticationAndAuthorization.Pages.login_signin.wizardSteps
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.UserService userService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@using BlazorServerAuthenticationAndAuthorization.Authentication
+@using BlazorServerAuthenticationAndAuthorization.models
+
+<EditForm Model="UserEditModel" OnValidSubmit="OnValidSubmit" class="d-flex flex-column w-50 ">
+    <DataAnnotationsValidator />
+
+    <MudTextField FullWidth Label="First name" HelperText="Max. 8 characters" Variant="Variant.Outlined"
+                    @bind-Value="UserEditModel.Username" For="@(() => UserEditModel.Username)" />
+    <MudTextField FullWidth Label="Email" Class="mt-3" Variant="Variant.Outlined"
+                    @bind-Value="UserEditModel.Email" For="@(() => UserEditModel.Email)" HelperText="Enter a valid email address" />
+    <MudTextField FullWidth Label="Password" HelperText="Choose a strong password" Class="mt-3" Variant="Variant.Outlined"
+                    @bind-Value="UserEditModel.Password" For="@(() => UserEditModel.Password)" InputType="InputType.Password" />
+    <MudTextField FullWidth Label="Password" HelperText="Repeat the password" Class="mt-3" Variant="Variant.Outlined"
+                    @bind-Value="UserEditModel.Password2" For="@(() => UserEditModel.Password2)" InputType="InputType.Password" />
+
+    <MudTextField FullWidth @bind-Value="UserEditModel.bio" Label="BIO" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                    Immediate="true" Placeholder="type here" Lines="3"
+                    HelperText="@("Max 420 characters. Current: " + UserEditModel.bio.Length)" For="@(() => UserEditModel.bio)" />
+    <MudTextField FullWidth @bind-Value="UserEditModel.ImageUrl" Label="IAMGE URL" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                    Immediate="true" Placeholder="type here"
+                    HelperText="Enter a valid URL" For="@(() => UserEditModel.ImageUrl)" />
+
+    <MudCardActions >
+        <MudButton Variant="Variant.Filled" OnClick="removeUser"
+                   Color="Color.Secondary">REMOVE</MudButton>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                   Color="Color.Primary" Class="ml-auto">Update</MudButton>
+    </MudCardActions>
+</EditForm>
+
+@code {
+    private User user { get; set; } = new User();
+
+    private UserEditForm UserEditModel { get; set; } = new();
+
+    private async void OnValidSubmit(EditContext context)
+    {
+        user.Name = UserEditModel.Username;
+        user.Email = UserEditModel.Email;
+        user.Password = UserEditModel.Password;
+        user.Bio = UserEditModel.bio;
+        user.ProfilePicUrl = UserEditModel.ImageUrl;
+        await registerUserAsync();
+        NavigationManager.NavigateTo($"/user/{user.Id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await ((CustomAuthenticationStateProvider) AuthenticationStateProvider).GetAuthenticationStateAsync();
+        var userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+        user = (await userService.GetUserByIdAsync(int.Parse(userId)))!;
+
+        UserEditModel.Username = user.Name;
+        UserEditModel.Email = user.Email;
+        UserEditModel.bio = user.Bio;
+        UserEditModel.ImageUrl = user.ProfilePicUrl;
+    }
+
+    private async void removeUser()
+    {
+        await userService.RemoveUserAsync(user.Id);
+        var provider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+        await provider.UpdateAuthenticationState(null);
+        NavigationManager.NavigateTo("/");
+	}
+
+	private async Task registerUserAsync()
+	{
+		await userService.UpdateUserAsync(user);
+		var userDb = await userService.GetUserByNameAsync(user.Name);
+	}
+}

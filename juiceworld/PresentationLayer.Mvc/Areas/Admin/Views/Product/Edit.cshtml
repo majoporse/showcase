@@ -1,0 +1,13 @@
+@using PresentationLayer.Mvc
+@model PresentationLayer.Mvc.Areas.Admin.Models.ProductEditViewModel
+
+@{
+    ViewData[Constants.Keys.Title] = "Edit Product";
+    ViewData[Constants.Keys.Action] = "Edit";
+    ViewData[Constants.Keys.ButtonText] = "Save";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData[Constants.Keys.Title]</h2>
+    @await Html.PartialAsync("_ProductForm", Model)
+</div>

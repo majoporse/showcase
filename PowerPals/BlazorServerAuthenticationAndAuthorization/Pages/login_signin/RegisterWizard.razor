@@ -1,0 +1,48 @@
+﻿@using System.ComponentModel.DataAnnotations
+@inject NavigationManager navigationManager
+@layout SigninLayout
+@using BlazorServerAuthenticationAndAuthorization.models
+@using BlazorServerAuthenticationAndAuthorization.Pages.login_signin.wizardSteps
+@using powerPalsDb.Models
+@inject PowerPalsServices.UserService userService
+@page "/sign-in"
+@using System.Security.Claims
+@using BlazorServerAuthenticationAndAuthorization.Authentication;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@if (step == 1)
+{
+	<RegisterForm onClick="@NextStep" user="@user"/>
+}
+else if (step == 2)
+{
+	<AdditionalDetailsForm user="user" onClick="@(async () => { await registerUserAsync();  })" />
+} 
+else if (step == 3)
+{
+	 <PickGym/>
+}
+
+@code{
+	private int step = 1;
+	private User user { get; set; } = new();
+
+	private void NextStep()
+	{
+		step++;
+		StateHasChanged();
+	}
+
+	private async Task registerUserAsync()
+	{
+		await userService.AddUserAsync(user);
+		var userDb = (await userService.GetUserByNameAsync(user.Name))!;
+		var customAuthStateProvider = (CustomAuthenticationStateProvider) AuthenticationStateProvider;
+		await customAuthStateProvider.UpdateAuthenticationState(new UserSession
+			{
+				UserName = userDb.Name,
+				Id = userDb.Id
+			});
+		NextStep();
+	}
+}

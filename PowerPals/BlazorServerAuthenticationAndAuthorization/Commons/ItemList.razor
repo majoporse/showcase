@@ -1,0 +1,16 @@
+﻿@using BlazorServerAuthenticationAndAuthorization.models
+
+<MudList Class="d-flex flex-column align-items-center">
+	@foreach (var item in Items)
+	{
+		<ItemPreview preview="item" OnClick="@onClick"/>
+	}
+</MudList>
+
+@code {
+	[Parameter]
+	public List<Preview> Items { get; set; } = new List<Preview>();
+
+	[Parameter]
+	public EventCallback<int> onClick { get; set; }
+}

@@ -1,0 +1,97 @@
+﻿@page "/edit/gym/{gymId}"
+@using BlazorServerAuthenticationAndAuthorization.Pages.login_signin.wizardSteps
+@using System.Security.Claims
+@using powerPalsDb.Models
+@inject PowerPalsServices.GymService GymService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+@using BlazorServerAuthenticationAndAuthorization.Authentication
+@using BlazorServerAuthenticationAndAuthorization.models
+
+<EditForm Model="model" OnValidSubmit="OnValidSubmit" class="d-flex flex-column w-50 ">
+    <DataAnnotationsValidator />
+    <MudTextField @bind-Value="model.Name" Label="GYM name" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                  Immediate="true" Placeholder="type here"
+                  HelperText="Enter a valid URL" For="@(() => model.Name)" />
+
+    <MudTextField @bind-Value="model.ImageUrl" Label="Image url" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                  Immediate="true" Placeholder="type here"
+                  HelperText="Enter a valid URL" For="@(() => model.ImageUrl)" />
+
+    <MudTextField @bind-Value="model.desc" Label="Description" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                  Immediate="true" Placeholder="type here" Lines="3"
+                  HelperText="@("Max 420 characters. Current: " + model.desc.Length)" For="@(() => model.desc)" />
+
+    <MudCardActions>
+        <MudButton Variant="Variant.Filled" OnClick="removeGym"
+                   Color="Color.Secondary">REMOVE</MudButton>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                   Color="Color.Primary" Class="ml-auto">Update</MudButton>
+    </MudCardActions>
+</EditForm>
+
+@code {
+    private int step = 1;
+
+    public Gym gym { get; set; } = new();
+
+    [Parameter]
+    public string? gymId { get; set; }
+
+    RegisterGymForm model = new RegisterGymForm();
+    bool success;
+
+    private async void OnValidSubmit()
+    {
+        gym.Name = model.Name;
+        gym.ImageUrl = model.ImageUrl;
+        gym.Description = model.desc;
+        await editGymAsync();
+        NavigationManager.NavigateTo($"/gym/{gym.Id}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await ((CustomAuthenticationStateProvider)AuthenticationStateProvider).GetAuthenticationStateAsync();
+        var _userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+        var userId = int.Parse(_userId);
+
+        //check if the route parameter is correct
+        if (gymId == null || !int.TryParse(gymId, out var gymIdNum))
+        {
+            Snackbar.Add("Wrong gym url", Severity.Error);
+            NavigationManager.NavigateTo("/home");
+        }
+
+        var _gym = await GymService.GetGymByIdAsync(int.Parse(gymId!));
+        if (_gym == null)
+        {
+            Snackbar.Add("Gym does not exist", Severity.Error);
+            NavigationManager.NavigateTo("/home");
+        }
+        gym = _gym!;
+
+        if (gym.UserId != userId)
+		{
+			Snackbar.Add("You do not have permission to edit this gym", Severity.Error);
+			NavigationManager.NavigateTo("/home");
+		}
+
+        model.Name = gym.Name;
+        model.desc = gym.Description;
+        model.ImageUrl = gym.ImageUrl;
+    }
+
+    private async void removeGym()
+    {
+        await GymService.DeleteGymAsync(gym.Id);
+        NavigationManager.NavigateTo("/home");
+    }
+
+    private async Task editGymAsync()
+    {
+        await GymService.UpdateGymAsync(gym);
+        var gymdb = await GymService.GetGymByIdAsync(gym.Id);
+    }
+}

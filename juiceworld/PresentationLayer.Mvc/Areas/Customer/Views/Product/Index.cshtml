@@ -1,0 +1,304 @@
+@using BusinessLayer.Services
+@using Commons.Enums
+@using PresentationLayer.Mvc
+@model BusinessLayer.DTOs.SearchablesFilterResultDto
+
+@{
+    ViewData[Constants.Keys.Title] = "Shop";
+}
+
+<form method="get" id="form-group" action="@Url.Action("Index")" class="form-group mr-2 d-flex flex-row gap-2">
+    <input type="text" name="NameQuery" value="@ViewContext.HttpContext.Request.Query["NameQuery"].ToString()"
+           class="form-control" placeholder="Search by name..."/>
+    <input type="hidden" id="TagPageIndex" name="TagPageIndex" value="@Model.Tags.PageIndex"/>
+    <input type="hidden" id="ProductPageIndex" name="ProductPageIndex" value="@Model.Products.PageIndex"/>
+    <input type="hidden" id="ManufacturerPageIndex" name="ManufacturerPageIndex" value="@Model.Manufacturers.PageIndex"/>
+    <input type="number" name="ProductPriceMin" placeholder="Min Price"
+           value="@ViewContext.HttpContext.Request.Query["ProductPriceMin"]"/>
+    <input type="number" name="ProductPriceMax" placeholder="Max Price"
+           value="@ViewContext.HttpContext.Request.Query["ProductPriceMax"]"/>
+
+    <select name="ProductCategory" asp-items="Html.GetEnumSelectList<ProductCategory>()">
+        <option value="">Select Category</option>
+    </select>
+
+    <button type="button" class="btn-secondary" onclick="window.location.href='@Url.Action("Index")'">Clear</button>
+    <button type="submit" class="btn-primary">Search</button>
+</form>
+
+@if (Model.Tags.Entities.Any())
+{
+    <h2>Tags</h2>
+    <div class="tag-list">
+        @foreach (var tag in Model.Tags.Entities)
+        {
+            <div class="tag-card" style="color: @tag.ColorHex;" onclick="setTagId(event, @tag.Id)">
+                <p>@tag.Name</p>
+            </div>
+        }
+    </div>
+    @if (Model.Tags.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (Model.Tags.PageIndex > 1)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Tag', @Model.Tags.PageIndex - 1)">Previous</a>
+            }
+
+            @for (var i = 1; i <= Model.Tags.TotalPages; i++)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Tag', @i)"
+                   class="@(i == Model.Tags.PageIndex ? "active" : "")">@i</a>
+            }
+
+            @if (Model.Tags.PageIndex < Model.Tags.TotalPages)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Tag', @Model.Tags.PageIndex + 1)">Next</a>
+            }
+        </div>
+    }
+}
+
+@if (Model.Products.Entities.Any())
+{
+    <h2 class="section-title">Products</h2>
+    <div class="product-list">
+        @foreach (var product in Model.Products.Entities)
+        {
+            <div class="product-card">
+                <a href="@Url.Action("Details", new { id = product.Id })">
+                    <div class="product-image">
+                        <img src="@(string.IsNullOrEmpty(product.Image) ? "/images/product_placeholder.jpg" : $"{product.Imageurl}")" alt="@product.Image" />
+                    </div>
+                    <div class="product-info">
+                        <h3>@product.Name</h3>
+                        <p>@product.Price.ToString("C")</p>
+                        <div class="product-category">
+                            <span>Category: </span>
+                            <span class="category-chip">@product.Category</span>
+                        </div>
+                        <p>Manufacturer: @product.Manufacturer.Name</p>
+                        <div class="product-tags">
+                            @foreach (var tag in product.Tags)
+                            {
+                                <span class="tag-chip" style="background-color: @tag.ColorHex;"
+                                      onclick="setTagId(event, @tag.Id)">@tag.Name</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+    @if (Model.Products.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (Model.Products.PageIndex > 1)
+            {
+                <a href="javascript:void(0);"
+                   onclick="setPageIndex('Product', @Model.Products.PageIndex - 1)">Previous</a>
+            }
+
+            @for (var i = 1; i <= Model.Products.TotalPages; i++)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Product', @i)"
+                   class="@(i == Model.Products.PageIndex ? "active" : "")">@i</a>
+            }
+
+            @if (Model.Products.PageIndex < Model.Products.TotalPages)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Product', @Model.Products.PageIndex + 1)">Next</a>
+            }
+        </div>
+    }
+}
+
+@if (Model.Manufacturers.Entities.Any())
+{
+    <h2 class="section-title">Manufacturers</h2>
+    <div class="manufacturer-list">
+        @foreach (var manufacturer in Model.Manufacturers.Entities)
+        {
+            <div class="manufacturer-card" onclick="setManufacturerId(@manufacturer.Id)">
+                <p>@manufacturer.Name</p>
+            </div>
+        }
+    </div>
+    @if (Model.Manufacturers.TotalPages > 1)
+    {
+        <div class="pagination">
+            @if (Model.Manufacturers.PageIndex > 1)
+            {
+                <a href="javascript:void(0);"
+                   onclick="setPageIndex('Manufacturer', @Model.Manufacturers.PageIndex - 1)">Previous</a>
+            }
+
+            @for (var i = 1; i <= Model.Manufacturers.TotalPages; i++)
+            {
+                <a href="javascript:void(0);" onclick="setPageIndex('Manufacturer', @i)"
+                   class="@(i == Model.Manufacturers.PageIndex ? "active" : "")">@i</a>
+            }
+
+            @if (Model.Manufacturers.PageIndex < Model.Manufacturers.TotalPages)
+            {
+                <a href="javascript:void(0);"
+                   onclick="setPageIndex('Manufacturer', @Model.Manufacturers.PageIndex + 1)">Next</a>
+            }
+        </div>
+    }
+}
+
+<script>
+    function updateSearchParam(key, value) {
+        const url = new URL(window.location.href);
+        url.searchParams.set(key, value);
+        window.location.href = url.toString();
+    }
+
+    function setTagId(event, tagId) {
+        event.stopPropagation();
+        event.preventDefault();
+        updateSearchParam('TagId', tagId);
+    }
+
+    function setManufacturerId(manufacturerId) {
+        updateSearchParam('ManufacturerId', manufacturerId);
+    }
+
+    function setPageIndex(pageType, pageIndex) {
+        updateSearchParam(pageType + 'PageIndex', pageIndex);
+    }
+
+    function setNameQuery(nameQuery) {
+        updateSearchParam('NameQuery', nameQuery);
+    }
+    
+    document.getElementById('form-group').addEventListener('submit', function () {
+        document.getElementById('TagPageIndex').value = 1;
+        document.getElementById('ProductPageIndex').value = 1;
+        document.getElementById('ManufacturerPageIndex').value = 1;
+    });
+</script>
+
+<style>
+    h1, h2 {
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
+
+    .section-title {
+        margin-top: 40px;
+    }
+
+    .tag-list, .manufacturer-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .product-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .tag-card, .manufacturer-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px 10px;
+        transition: background-color 0.3s ease;
+        height: 50px;
+        cursor: pointer;
+    }
+
+    .tag-card p, .manufacturer-card p {
+        margin: 0;
+        padding: 5px;
+    }
+
+    .product-card {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
+        width: 100%;
+        text-align: left;
+        padding-left: 10px;
+        transition: background-color 0.3s ease;
+    }
+
+    .product-card:hover, .tag-card:hover, .manufacturer-card:hover {
+        background-color: #f0f0f0;
+    }
+
+    .product-card a {
+        display: flex;
+        width: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .product-image {
+        display: flex;
+        align-items: center;
+        flex: 0 0 auto;
+        width: 100px;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: auto;
+        margin-right: 10px;
+    }
+
+    .product-info {
+        flex: 1 1 auto;
+        padding: 10px;
+    }
+
+    .product-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .tag-chip {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 15px;
+        color: #fff;
+        font-size: 0.8em;
+    }
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .pagination a {
+        margin: 0 5px;
+        text-decoration: none;
+    }
+
+    .pagination a.active {
+        font-weight: bold;
+    }
+
+    .product-category {
+        margin-top: 10px;
+    }
+
+    .category-chip {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 15px;
+        background-color: #6c757d;
+        color: #fff;
+        font-size: 0.8em;
+    }
+</style>

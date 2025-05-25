@@ -1,0 +1,55 @@
+﻿@page "/create/gym"
+@using System.ComponentModel.DataAnnotations
+@using BlazorServerAuthenticationAndAuthorization.models
+@using powerPalsDb.Models
+@using System.Linq
+@using System.Security.Claims
+@inject PowerPalsServices.GymService GymService
+@inject NavigationManager NavigationManager
+
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit" class="w-100">
+    <DataAnnotationsValidator />
+    <MudPaper Class="mt-5 d-flex flex-column justify-content-center" Elevation="0">
+
+        <MudTextField @bind-Value="model.Name" Label="GYM name" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                      Immediate="true" Placeholder="type here"
+                      HelperText="Enter a valid URL" For="@(() => model.Name)" />
+
+        <MudTextField @bind-Value="model.ImageUrl" Label="Image url" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                        Immediate="true" Placeholder="type here"
+                        HelperText="Enter a valid URL" For="@(() => model.ImageUrl)" />
+
+        <MudTextField @bind-Value="model.desc" Label="Description" Variant="Variant.Outlined" HelperTextOnFocus="true"
+                      Immediate="true" Placeholder="type here" Lines="3"
+                      HelperText="@("Max 420 characters. Current: " + model.desc.Length)" For="@(() => model.desc)" />
+
+    <MudCardActions>
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled"
+                   Color="Color.Primary" Class="mx-auto">Create GYM</MudButton>
+    </MudCardActions>
+    </MudPaper>
+</EditForm>
+
+@code {
+    RegisterGymForm model = new RegisterGymForm();
+
+    [CascadingParameter]
+    protected Task<AuthenticationState>? authenticationState { get; set; }
+
+    private async void OnValidSubmit(EditContext context)
+    {
+        var state = await authenticationState!;
+        string userId = state.User.Claims.ToList().Find(i => i.Type == ClaimTypes.NameIdentifier)!.Value;
+        Gym gym = new Gym()
+        {
+            UserId = int.Parse(userId),
+            Name = model.Name,
+			ImageUrl = model.ImageUrl,
+			Description = model.desc,
+            
+		};
+        await GymService.AddGymAsync(gym);
+        var gymDb = await GymService.GetGymsByNameAsync(gym.Name);
+        NavigationManager.NavigateTo($"/gym/{gym.Id}");
+	}
+}
