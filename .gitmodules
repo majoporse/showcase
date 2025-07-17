@@ -1,0 +1,3 @@
+[submodule "TextInatorX"]
+	path = TextInatorX
+	url = git@github.com:majoporse/TextInatorX.git
