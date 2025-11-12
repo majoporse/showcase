@@ -3,7 +3,9 @@
 ## A text editor with additional features developed in Rust
 
 ---
-
+## Demo 
+![Demo](./demo.mp4)
+---
 ## **Project Background**
 
 This application was developed as a **group project** during my software development studies, specifically for a course focused on the **Rust programming language**. Our team consisted of three developers. While my individual contribution was part of a collaborative effort, I'm proud to showcase this project as I believe it demonstrates strong teamwork and a successful implementation.
