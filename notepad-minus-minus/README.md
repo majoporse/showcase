@@ -4,7 +4,9 @@
 
 ---
 ## Demo 
-![Demo](./demo.mp4)
+
+https://github.com/user-attachments/assets/2730d91f-5da0-404a-aa59-157cf0484b90
+
 ---
 ## **Project Background**
 
